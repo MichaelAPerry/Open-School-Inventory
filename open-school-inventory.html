@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Open School Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root {
+  --bg:        #09090b;
+  --bg2:       #111113;
+  --bg3:       #18181b;
+  --bg4:       #1f1f23;
+  --border:    #27272a;
+  --border2:   #3f3f46;
+  --blue:      #3b82f6;
+  --blue-dim:  #0f1e3d;
+  --blue-glow: rgba(59,130,246,0.15);
+  --green:     #22c55e;
+  --green-dim: #0a2215;
+  --amber:     #f59e0b;
+  --amber-dim: #2d1f00;
+  --red:       #ef4444;
+  --red-dim:   #2d0a0a;
+  --text:      #e4e4e7;
+  --text-dim:  #71717a;
+  --text-muted:#3f3f46;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Barlow', sans-serif;
+  --display:   'Barlow Condensed', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; }
+
+/* NAV */
+nav {
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: stretch; padding: 0;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 1px 20px rgba(0,0,0,0.6);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1.25rem; border-right: 1px solid var(--border);
+  white-space: nowrap; text-decoration: none;
+}
+.nav-brand-icon {
+  width: 32px; height: 32px; background: var(--blue);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-weight: 800; font-size: 1rem; color: #fff;
+}
+.nav-brand-text { font-family: var(--display); font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; color: var(--text); }
+.nav-brand-text span { color: var(--text-dim); font-weight: 400; }
+.nav-tabs { display: flex; overflow-x: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  background: none; border: none; color: var(--text-dim);
+  font-family: var(--display); font-size: 0.95rem; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 0 1.1rem; cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; transition: all 0.15s;
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.nav-tab.admin-tab { color: var(--text-muted); }
+.nav-tab.admin-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+.nav-tab.admin-tab:hover { color: var(--amber); }
+.nav-right { display: flex; align-items: center; gap: 0.5rem; padding: 0 0.75rem; border-left: 1px solid var(--border); }
+.nav-lock-btn {
+  background: none; border: 1px solid var(--border2); border-radius: 6px;
+  color: var(--text-dim); padding: 0.35rem 0.65rem; cursor: pointer;
+  font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem;
+  transition: all 0.15s; white-space: nowrap; font-family: var(--display);
+  font-weight: 600; letter-spacing: 0.5px;
+}
+.nav-lock-btn:hover { border-color: var(--amber); color: var(--amber); }
+.nav-lock-btn.unlocked { border-color: var(--green); color: var(--green); }
+.admin-divider {
+  width: 1px; background: var(--border); margin: 0.5rem 0;
+  align-self: stretch;
+}
+
+/* VIEWS */
+main { padding: 1.25rem; max-width: 1400px; margin: 0 auto; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--display); font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; font-size: 0.88rem; line-height: 1;
+  padding: 0.55rem 1rem; border-radius: 6px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+.btn-ghost { background: transparent; color: var(--text-dim); border-color: var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--bg3); }
+.btn-danger { background: var(--red-dim); color: var(--red); border-color: rgba(239,68,68,0.3); }
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+.btn-amber { background: var(--amber); color: #000; font-weight: 800; }
+.btn-amber:hover { background: #fbbf24; }
+.btn-success { background: var(--green-dim); color: var(--green); border-color: rgba(34,197,94,0.3); }
+.btn-success:hover { background: rgba(34,197,94,0.2); }
+.btn-sm { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
+.btn-lg { padding: 0.85rem 1.75rem; font-size: 1.05rem; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* CARDS */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+.card-title { font-family: var(--display); font-size: 1rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; }
+
+/* STATS */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1.1rem 1.25rem; position: relative; overflow: hidden;
+}
+.stat-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; }
+.stat-card.blue::after  { background: var(--blue); }
+.stat-card.green::after { background: var(--green); }
+.stat-card.amber::after { background: var(--amber); }
+.stat-card.red::after   { background: var(--red); }
+.stat-label { font-family: var(--display); font-size: 0.72rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
+.stat-value { font-family: var(--mono); font-size: 2rem; font-weight: 700; margin-top: 0.25rem; }
+.stat-card.blue  .stat-value { color: var(--blue); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.amber .stat-value { color: var(--amber); }
+.stat-card.red   .stat-value { color: var(--red); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--bg3); }
+th { text-align: left; padding: 0.65rem 1rem; font-family: var(--display); font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59,130,246,0.03); }
+.mono { font-family: var(--mono); font-size: 0.8rem; color: #93c5fd; }
+
+/* BADGES */
+.badge { display: inline-block; padding: 0.18rem 0.5rem; border-radius: 4px; font-family: var(--display); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
+.badge-RAM        { background:rgba(99,102,241,.2); color:#a5b4fc; border:1px solid rgba(99,102,241,.3); }
+.badge-GPU        { background:rgba(239,68,68,.15); color:#fca5a5; border:1px solid rgba(239,68,68,.3); }
+.badge-CPU        { background:rgba(245,158,11,.15); color:#fcd34d; border:1px solid rgba(245,158,11,.3); }
+.badge-Cable      { background:rgba(34,197,94,.12); color:#86efac; border:1px solid rgba(34,197,94,.3); }
+.badge-Motherboard{ background:rgba(168,85,247,.15); color:#d8b4fe; border:1px solid rgba(168,85,247,.3); }
+.badge-Storage    { background:rgba(59,130,246,.15); color:#93c5fd; border:1px solid rgba(59,130,246,.3); }
+.badge-PSU        { background:rgba(251,146,60,.15); color:#fdba74; border:1px solid rgba(251,146,60,.3); }
+.badge-Network    { background:rgba(20,184,166,.15); color:#5eead4; border:1px solid rgba(20,184,166,.3); }
+.badge-Hardware   { background:rgba(113,113,122,.2); color:#a1a1aa; border:1px solid rgba(113,113,122,.3); }
+.badge-Tools      { background:rgba(234,179,8,.15); color:#fde047; border:1px solid rgba(234,179,8,.3); }
+.badge-Cooling    { background:rgba(56,189,248,.15); color:#7dd3fc; border:1px solid rgba(56,189,248,.3); }
+.badge-Other      { background:rgba(100,116,139,.15); color:#94a3b8; border:1px solid rgba(100,116,139,.3); }
+.badge-available  { background:var(--green-dim); color:var(--green); border:1px solid rgba(34,197,94,.3); }
+.badge-low        { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,158,11,.3); }
+.badge-out        { background:var(--red-dim); color:var(--red); border:1px solid rgba(239,68,68,.3); }
+.badge-active     { background:rgba(245,158,11,.12); color:var(--amber); border:1px solid rgba(245,158,11,.3); }
+.badge-returned   { background:var(--green-dim); color:var(--green); border:1px solid rgba(34,197,94,.3); }
+
+/* FORMS */
+.field { margin-bottom: 1rem; }
+.field:last-child { margin-bottom: 0; }
+.field label { display:block; margin-bottom:0.35rem; font-family:var(--display); font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); }
+.field input, .field select, .field textarea {
+  width:100%; background:var(--bg3); border:1px solid var(--border2);
+  color:var(--text); padding:0.6rem 0.8rem; border-radius:6px;
+  font-family:var(--body); font-size:0.9rem; transition:border-color .15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-glow);
+}
+.field select option { background:var(--bg3); }
+.field textarea { min-height:80px; resize:vertical; }
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:520px){ .field-row{grid-template-columns:1fr;} }
+
+/* MODALS */
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:500; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:1rem; }
+.modal-backdrop.open { display:flex; }
+.modal { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:1.75rem; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; box-shadow:0 30px 80px rgba(0,0,0,.7); }
+.modal-sm { max-width:380px; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.modal-title { font-family:var(--display); font-size:1.3rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+.modal-close { background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:1.5rem; line-height:1; padding:0.2rem; transition:color .15s; }
+.modal-close:hover { color:var(--red); }
+.modal-footer { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
+
+/* SECTION HEADER */
+.section-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:1.25rem; }
+.section-title { font-family:var(--display); font-size:1.5rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+.toolbar { display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; margin-bottom:1.25rem; }
+.toolbar-search { flex:1; min-width:180px; }
+.toolbar .field { margin:0; }
+
+/* INV GRID */
+.inv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1rem; }
+.inv-card {
+  background:var(--bg2); border:1px solid var(--border); border-radius:8px;
+  padding:1.1rem 1.25rem; cursor:pointer; transition:border-color .15s, transform .1s;
+}
+.inv-card:hover { border-color:var(--blue); transform:translateY(-1px); }
+.inv-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; margin-bottom:.5rem; }
+.inv-card-name { font-family:var(--display); font-size:1.05rem; font-weight:700; line-height:1.25; flex:1; }
+.inv-card-id   { font-family:var(--mono); font-size:0.68rem; color:var(--text-muted); margin-bottom:.4rem; }
+.inv-card-loc  { font-size:0.78rem; color:var(--text-dim); margin-top:.35rem; display:flex; align-items:center; gap:.3rem; }
+.inv-card-foot { display:flex; align-items:center; justify-content:space-between; margin-top:.75rem; }
+.qty-big { font-family:var(--mono); font-size:1.6rem; font-weight:700; line-height:1; }
+.qty-big.ok   { color:var(--green); }
+.qty-big.low  { color:var(--amber); }
+.qty-big.zero { color:var(--red); }
+.qty-of  { font-size:.75rem; color:var(--text-dim); font-family:var(--mono); }
+
+/* CHECKOUT — mobile-first */
+.co-wrap { max-width:540px; margin:0 auto; }
+.co-header { text-align:center; margin-bottom:2rem; }
+.co-header h2 { font-family:var(--display); font-size:2rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--blue); }
+.co-header p { color:var(--text-dim); font-size:.88rem; margin-top:.35rem; }
+
+.steps { display:flex; gap:0; margin-bottom:2rem; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.step-item { flex:1; text-align:center; padding:.65rem .5rem; background:var(--bg3); font-family:var(--display); font-size:.78rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--text-muted); border-right:1px solid var(--border); transition:all .2s; }
+.step-item:last-child { border-right:none; }
+.step-item .step-num { display:block; font-size:1.1rem; }
+.step-item.active { background:var(--blue-dim); color:var(--blue); }
+.step-item.done   { background:var(--green-dim); color:var(--green); }
+
+.id-big input {
+  font-family:var(--mono) !important; font-size:2rem !important;
+  text-align:center; letter-spacing:.5rem; padding:1rem !important;
+  border:2px solid var(--border2) !important; border-radius:8px !important;
+}
+.id-big input:focus { border-color:var(--blue) !important; }
+
+.scan-box {
+  background:var(--bg3); border:2px dashed var(--border2); border-radius:10px;
+  padding:2rem 1.5rem; text-align:center; cursor:pointer;
+  transition:all .2s; display:flex; flex-direction:column; align-items:center; gap:.75rem;
+}
+.scan-box:hover { border-color:var(--blue); background:var(--bg4); }
+.scan-icon { font-size:2.5rem; }
+.scan-box p { color:var(--text-dim); font-size:.88rem; }
+
+.item-result-row {
+  display:flex; align-items:center; gap:.75rem; padding:.8rem 1rem;
+  border-bottom:1px solid var(--border); cursor:pointer;
+  background:var(--bg3); transition:background .1s;
+}
+.item-result-row:last-child { border-bottom:none; }
+.item-result-row:hover { background:var(--bg4); }
+
+.confirm-card {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:8px;
+  padding:1.1rem 1.25rem; display:flex; align-items:center; gap:1rem; margin-bottom:1rem;
+}
+.alert { padding:.75rem 1rem; border-radius:6px; margin-bottom:1rem; font-size:.88rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.alert-blue  { background:var(--blue-dim); border:1px solid rgba(59,130,246,.3); color:#93c5fd; }
+.alert-green { background:var(--green-dim); border:1px solid rgba(34,197,94,.3); color:var(--green); }
+.alert-amber { background:var(--amber-dim); border:1px solid rgba(245,158,11,.3); color:var(--amber); }
+.alert-red   { background:var(--red-dim);   border:1px solid rgba(239,68,68,.3);  color:var(--red); }
+
+/* ACTIVITY */
+.activity-item { display:flex; gap:.75rem; padding:.7rem 0; border-bottom:1px solid var(--border); }
+.activity-item:last-child { border-bottom:none; }
+.dot { width:8px; height:8px; border-radius:50%; margin-top:.35rem; flex-shrink:0; }
+.dot.out { background:var(--amber); box-shadow:0 0 6px var(--amber); }
+.dot.in  { background:var(--green);  box-shadow:0 0 6px var(--green); }
+.act-text { font-size:.85rem; line-height:1.4; }
+.act-time { font-family:var(--mono); font-size:.7rem; color:var(--text-muted); margin-top:.15rem; }
+
+/* SETTINGS */
+.set-section { margin-bottom:2rem; }
+.set-section h3 { font-family:var(--display); font-size:1rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--blue); border-bottom:1px solid var(--border); padding-bottom:.5rem; margin-bottom:1rem; }
+.set-row { display:flex; gap:.75rem; flex-wrap:wrap; }
+.info-box { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:1rem; font-size:.85rem; color:var(--text-dim); line-height:1.6; }
+.info-box code { font-family:var(--mono); font-size:.78rem; color:#93c5fd; background:var(--bg4); padding:.1rem .35rem; border-radius:3px; }
+
+/* LABELS */
+.label-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+.label-card { background:#fff; color:#000; border-radius:6px; padding:.75rem .5rem; text-align:center; border:2px solid var(--border); }
+.label-card .l-name { font-family:var(--display); font-size:.8rem; font-weight:700; color:#111; margin-top:.4rem; line-height:1.2; }
+.label-card .l-id   { font-family:'Courier New',monospace; font-size:.6rem; color:#666; margin-top:.2rem; }
+.label-card .l-loc  { font-size:.58rem; color:#888; }
+.qr-cent { display:flex; justify-content:center; }
+
+/* CHIP FILTERS */
+.chips { display:flex; gap:.5rem; flex-wrap:wrap; }
+.chip { padding:.25rem .75rem; border-radius:999px; cursor:pointer; font-family:var(--display); font-size:.72rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; background:var(--bg3); border:1px solid var(--border); color:var(--text-dim); transition:all .15s; }
+.chip:hover { border-color:var(--blue); color:var(--blue); }
+.chip.on { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); }
+
+/* PIN MODAL */
+.pin-dots { display:flex; gap:.75rem; justify-content:center; margin:1.5rem 0 1rem; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--border2); background:transparent; transition:all .2s; }
+.pin-dot.filled { background:var(--blue); border-color:var(--blue); }
+.pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+.pin-key {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:8px;
+  padding:.9rem; font-family:var(--display); font-size:1.4rem; font-weight:700;
+  color:var(--text); cursor:pointer; transition:all .15s; text-align:center;
+}
+.pin-key:hover { background:var(--bg4); border-color:var(--border2); }
+.pin-key:active { transform:scale(.95); }
+.pin-key.del { font-size:1rem; color:var(--text-dim); }
+.pin-key.zero { grid-column:2; }
+.pin-error { text-align:center; color:var(--red); font-size:.85rem; min-height:1.2em; margin-top:.5rem; font-family:var(--display); letter-spacing:.5px; }
+
+/* EOD PANEL */
+.eod-panel { max-width:640px; }
+.eod-preview { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:1rem; font-family:var(--mono); font-size:.78rem; color:var(--text-dim); white-space:pre-wrap; max-height:320px; overflow-y:auto; }
+
+/* TOAST */
+#toast { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:.85rem 1.15rem; font-size:.88rem; box-shadow:0 10px 40px rgba(0,0,0,.6); transform:translateY(120px); opacity:0; transition:all .3s cubic-bezier(.34,1.56,.64,1); max-width:300px; display:flex; align-items:center; gap:.6rem; }
+#toast.show { transform:translateY(0); opacity:1; }
+#toast.success { border-left:3px solid var(--green); }
+#toast.error   { border-left:3px solid var(--red); }
+#toast.info    { border-left:3px solid var(--blue); }
+#toast.warning { border-left:3px solid var(--amber); }
+
+/* MISC */
+.divider { height:1px; background:var(--border); margin:1.25rem 0; }
+.no-items { text-align:center; padding:3rem 1rem; color:var(--text-muted); font-family:var(--display); letter-spacing:1px; text-transform:uppercase; font-size:.9rem; }
+.section-gap { margin-bottom:1.5rem; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.hidden { display:none !important; }
+.text-dim { color:var(--text-dim); }
+.text-muted { color:var(--text-muted); }
+.text-blue  { color:var(--blue); }
+.text-green { color:var(--green); }
+.text-amber { color:var(--amber); }
+.text-red   { color:var(--red); }
+.mt-1 { margin-top:.5rem; }
+.mt-2 { margin-top:1rem; }
+.mt-3 { margin-top:1.5rem; }
+.mb-1 { margin-bottom:.5rem; }
+.mb-2 { margin-bottom:1rem; }
+.flex { display:flex; }
+.items-center { align-items:center; }
+.justify-between { justify-content:space-between; }
+.gap-1 { gap:.5rem; }
+.gap-2 { gap:1rem; }
+
+@media(max-width:700px) {
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .grid-2 { grid-template-columns:1fr; }
+  .nav-brand-text { display:none; }
+  main { padding:.75rem; }
+}
+@media(max-width:420px) {
+  .label-grid { grid-template-columns:repeat(2,1fr); }
+}
+
+@media print {
+  nav, .no-print, .chip, .toolbar { display:none !important; }
+  body { background:#fff; color:#000; }
+  .label-card { border:1px solid #ccc; break-inside:avoid; }
+  .label-grid { grid-template-columns:repeat(3,1fr); }
+  main { padding:0; }
+}
+
+/* SYNC INDICATOR */
+.sync-pill {
+  display:flex; align-items:center; gap:.35rem;
+  font-family:var(--mono); font-size:.68rem; color:var(--text-muted);
+  padding:.3rem .6rem; border-radius:999px;
+  border:1px solid var(--border); background:var(--bg3);
+  white-space:nowrap; transition:all .3s;
+}
+.sync-pill.syncing { border-color:rgba(59,130,246,.4); color:var(--blue); }
+.sync-pill.ok      { border-color:rgba(34,197,94,.3);  color:var(--green); }
+.sync-pill.error   { border-color:rgba(239,68,68,.3);  color:var(--red); }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.sync-dot.spin { animation:spin-dot .8s linear infinite; }
+@keyframes spin-dot { 0%{opacity:1} 50%{opacity:.2} 100%{opacity:1} }
+.offline-banner { display:none; background:var(--amber-dim); border-bottom:1px solid rgba(245,158,11,.3); padding:.5rem 1rem; text-align:center; font-size:.82rem; color:var(--amber); font-family:var(--display); letter-spacing:.5px; }
+.offline-banner.show { display:block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div id="offline-banner" class="offline-banner">⚠ Server unreachable — showing cached data. Changes will sync when connection restores.</div>
+<nav id="main-nav">
+  <div class="nav-brand">
+    <div class="nav-brand-icon">OSI/div>
+    <div class="nav-brand-text">Inventory <span>System</span></div>
+  </div>
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="nav-tab active" onclick="showView('dashboard')" data-view="dashboard">Dashboard</button>
+    <button class="nav-tab" onclick="showView('inventory')" data-view="inventory">Inventory</button>
+    <button class="nav-tab" onclick="showView('checkout')" data-view="checkout">Check Out</button>
+    <!-- Admin tabs (hidden until unlocked) -->
+    <div class="admin-divider" id="admin-divider" style="display:none"></div>
+    <button class="nav-tab admin-tab hidden" onclick="showView('returns')"  data-view="returns"  id="tab-returns">Returns</button>
+    <button class="nav-tab admin-tab hidden" onclick="showView('history')"  data-view="history"  id="tab-history">History</button>
+    <button class="nav-tab admin-tab hidden" onclick="showView('eod')"      data-view="eod"      id="tab-eod">EOD Email</button>
+    <button class="nav-tab admin-tab hidden" onclick="showView('labels')"   data-view="labels"   id="tab-labels">Labels</button>
+    <button class="nav-tab admin-tab hidden" onclick="showView('settings')" data-view="settings" id="tab-settings">Settings</button>
+  </div>
+  <div class="nav-right">
+    <div class="sync-pill" id="sync-pill" title="Server sync status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">connecting…</span>
+    </div>
+    <button class="nav-lock-btn" id="lock-btn" onclick="handleLockBtn()">🔒 Admin</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div id="view-dashboard" class="view active">
+  <div class="section-header">
+    <div>
+      <div class="section-title" id="dash-lab-name">School Lab</div>
+      <div class="text-dim" id="dash-date" style="font-size:.85rem;font-family:var(--mono)"></div>
+    </div>
+    <div id="dash-admin-actions" class="hidden">
+      <button class="btn btn-primary" onclick="openAddItem()">+ Add Item</button>
+    </div>
+  </div>
+  <div class="stats-row section-gap" id="dash-stats"></div>
+  <div class="grid-2 section-gap">
+    <div class="card"><div class="card-title">⚠ Low / Out of Stock</div><div id="dash-lowstock"></div></div>
+    <div class="card"><div class="card-title">⟲ Recent Activity</div><div id="dash-activity"></div></div>
+  </div>
+  <div class="card">
+    <div class="flex items-center justify-between mb-2">
+      <div class="card-title" style="margin:0">📋 Active Checkouts</div>
+      <span id="dash-active-count" class="text-dim" style="font-size:.82rem;font-family:var(--mono)"></span>
+    </div>
+    <div id="dash-active-co"></div>
+  </div>
+</div>
+
+<!-- ═══════════ INVENTORY ═══════════ -->
+<div id="view-inventory" class="view">
+  <div class="section-header">
+    <div class="section-title">Inventory</div>
+    <div id="inv-admin-btn" class="hidden"><button class="btn btn-primary" onclick="openAddItem()">+ Add Item</button></div>
+  </div>
+  <div class="toolbar">
+    <div class="toolbar-search field" style="margin:0">
+      <input type="text" id="inv-search" placeholder="Search name, ID, location…" oninput="renderInventory()">
+    </div>
+    <select id="inv-cat-filter" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.6rem .8rem;border-radius:6px;font-family:var(--body);font-size:.88rem;" onchange="renderInventory()">
+      <option value="">All Categories</option>
+    </select>
+    <select id="inv-status-filter" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.6rem .8rem;border-radius:6px;font-family:var(--body);font-size:.88rem;" onchange="renderInventory()">
+      <option value="">All Status</option>
+      <option value="available">Available</option>
+      <option value="low">Low Stock</option>
+      <option value="out">Out of Stock</option>
+    </select>
+    <span id="inv-count" class="text-dim" style="font-size:.82rem;white-space:nowrap;font-family:var(--mono)"></span>
+  </div>
+  <div id="inv-grid" class="inv-grid"></div>
+</div>
+
+<!-- ═══════════ CHECK OUT ═══════════ -->
+<div id="view-checkout" class="view">
+  <div class="co-wrap">
+    <div class="co-header">
+      <h2>Check Out Item</h2>
+      <p>Enter your student ID, then search or scan an item QR code with your phone camera.</p>
+    </div>
+    <div class="steps">
+      <div class="step-item active" id="step-1"><span class="step-num">1</span>Your ID</div>
+      <div class="step-item"        id="step-2"><span class="step-num">2</span>Item</div>
+      <div class="step-item"        id="step-3"><span class="step-num">3</span>Confirm</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="co-s1">
+      <div class="field id-big">
+        <label>Student ID — type or scan barcode</label>
+        <input type="tel" id="co-sid" maxlength="10" placeholder="––––––"
+          oninput="onSidInput()" autocomplete="off">
+      </div>
+      <div id="co-sid-hint" class="text-dim mt-1" style="font-size:.82rem;text-align:center"></div>
+      <button class="btn btn-primary btn-lg btn-block mt-2" onclick="coNext1()">Next →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="co-s2" class="hidden">
+      <div class="alert alert-blue mb-2" style="justify-content:space-between">
+        <span>Student: <strong id="co-sid-display"></strong></span>
+        <button class="btn btn-ghost btn-sm" onclick="coReset()">Change</button>
+      </div>
+      <div class="field mb-1">
+        <label>Search item by name or scan QR</label>
+        <input type="text" id="co-item-q" placeholder="Type item name or ID…" oninput="renderCoResults()" autocomplete="off">
+      </div>
+      <div id="co-item-results" style="border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:220px;overflow-y:auto;margin-bottom:1rem;"></div>
+
+      <div class="scan-box" onclick="toggleCoScanner()">
+        <div class="scan-icon">📷</div>
+        <p><strong>Tap to scan QR code</strong><br>Point your phone camera at an item label</p>
+      </div>
+      <div id="co-scanner-wrap" class="hidden mt-2">
+        <div id="qr-co"></div>
+        <div id="co-scan-msg" class="mt-1"></div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="co-s3" class="hidden">
+      <div class="alert alert-blue mb-2">Student: <strong id="co-confirm-sid"></strong></div>
+      <div class="confirm-card" id="co-confirm-card"></div>
+      <div class="field">
+        <label>Quantity</label>
+        <input type="number" id="co-qty" value="1" min="1">
+      </div>
+      <div class="field">
+        <label>Notes (project, reason, etc.)</label>
+        <input type="text" id="co-notes" placeholder="Optional">
+      </div>
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-ghost" onclick="coBack2()">← Back</button>
+        <button class="btn btn-amber btn-lg" style="flex:1" onclick="confirmCo()">✓ Confirm Checkout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RETURNS (admin) ═══════════ -->
+<div id="view-returns" class="view">
+  <div class="co-wrap" style="max-width:700px">
+    <div class="section-header">
+      <div class="section-title text-green">Return Items</div>
+    </div>
+    <div class="field mb-2">
+      <label>Search by Student ID or Item Name</label>
+      <input type="text" id="ret-q" placeholder="Student ID or item name…" oninput="renderReturns()">
+    </div>
+    <div id="ret-results"></div>
+  </div>
+</div>
+
+<!-- ═══════════ HISTORY (admin) ═══════════ -->
+<div id="view-history" class="view">
+  <div class="section-header">
+    <div class="section-title">Transaction History</div>
+    <button class="btn btn-ghost btn-sm no-print" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+  <div class="toolbar no-print">
+    <div class="toolbar-search field" style="margin:0">
+      <input type="text" id="hist-q" placeholder="Student ID, item name…" oninput="renderHistory()">
+    </div>
+    <select id="hist-filter" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:.6rem .8rem;border-radius:6px;" onchange="renderHistory()">
+      <option value="">All</option>
+      <option value="out">Active Checkouts</option>
+      <option value="returned">Returned</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date Out</th><th>Student</th><th>Item</th><th>Qty</th><th>Notes</th><th>Status</th><th>Returned</th></tr></thead>
+      <tbody id="hist-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ EOD EMAIL (admin) ═══════════ -->
+<div id="view-eod" class="view">
+  <div class="eod-panel">
+    <div class="section-header">
+      <div class="section-title">End-of-Day Email</div>
+    </div>
+    <div class="card mb-2">
+      <div class="card-title">Email Preview</div>
+      <p class="text-dim mb-2" style="font-size:.85rem;">Items currently checked out that have not been returned. Click Send to deliver via EmailJS.</p>
+      <div class="eod-preview" id="eod-preview">Loading…</div>
+    </div>
+    <div class="flex gap-2 flex-wrap mt-2">
+      <button class="btn btn-amber btn-lg" onclick="sendEodEmail()" id="eod-send-btn">📧 Send EOD Email Now</button>
+      <button class="btn btn-ghost" onclick="refreshEodPreview()">↻ Refresh Preview</button>
+    </div>
+    <div id="eod-status" class="mt-2"></div>
+    <div class="divider"></div>
+    <div class="info-box">
+      <strong>EmailJS not configured?</strong> Go to <strong>Settings → Email Setup</strong> to enter your EmailJS credentials. It only takes ~5 minutes to set up a free account. Once configured, this button sends the report automatically — no email client needed.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LABELS (admin) ═══════════ -->
+<div id="view-labels" class="view">
+  <div class="section-header">
+    <div class="section-title">Print QR Labels</div>
+    <button class="btn btn-primary no-print" onclick="window.print()">🖨 Print</button>
+  </div>
+  <p class="text-dim mb-2 no-print" style="font-size:.85rem;">Select items below, then click Print. Attach QR labels to bins, bags, and components so students can scan with their phones.</p>
+  <div class="no-print mb-2">
+    <div class="field mb-1"><input type="text" id="label-q" placeholder="Filter items…" oninput="renderLabels()"></div>
+    <div class="flex gap-1 mb-1">
+      <button class="btn btn-ghost btn-sm" onclick="labelSelectAll()">Select All</button>
+      <button class="btn btn-ghost btn-sm" onclick="labelClearAll()">Clear</button>
+    </div>
+    <div id="label-chips" class="chips mt-1"></div>
+  </div>
+  <div id="labels-grid" class="label-grid"></div>
+</div>
+
+<!-- ═══════════ SETTINGS (admin) ═══════════ -->
+<div id="view-settings" class="view">
+  <div class="section-header"><div class="section-title">Settings</div></div>
+  <div style="max-width:640px;">
+
+    <div class="set-section">
+      <h3>Lab Info</h3>
+      <div class="field-row">
+        <div class="field"><label>Lab / School Name</label><input type="text" id="set-school" placeholder="Tech Lab — School Name"></div>
+        <div class="field"><label>Instructor</label><input type="text" id="set-instructor" placeholder="Your name"></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+
+    <div class="set-section">
+      <h3>Admin PIN</h3>
+      <div class="field-row">
+        <div class="field"><label>New PIN (4–8 digits)</label><input type="password" id="set-pin" placeholder="••••" maxlength="8" inputmode="numeric"></div>
+        <div class="field"><label>Confirm PIN</label><input type="password" id="set-pin2" placeholder="••••" maxlength="8" inputmode="numeric"></div>
+      </div>
+      <button class="btn btn-primary" onclick="savePin()">Change PIN</button>
+      <p class="text-dim mt-1" style="font-size:.8rem;">Default PIN is <code style="font-family:var(--mono);background:var(--bg3);padding:.1rem .35rem;border-radius:3px">1234</code>. Change it now.</p>
+    </div>
+
+    <div class="set-section">
+      <h3>Email Setup (EmailJS)</h3>
+      <div class="info-box mb-2">
+        Free setup at <strong>emailjs.com</strong>. Steps: (1) Create account → (2) Add Email Service (Gmail works) → (3) Create Template with variables <code>{{to_email}}</code>, <code>{{subject}}</code>, <code>{{message}}</code> → (4) Copy your <strong>Public Key</strong>, <strong>Service ID</strong>, and <strong>Template ID</strong> below.
+      </div>
+      <div class="field"><label>EmailJS Public Key</label><input type="text" id="set-ejs-key" placeholder="user_xxxxxxxxxxxx"></div>
+      <div class="field-row">
+        <div class="field"><label>Service ID</label><input type="text" id="set-ejs-svc" placeholder="service_xxxxxxx"></div>
+        <div class="field"><label>Template ID</label><input type="text" id="set-ejs-tpl" placeholder="template_xxxxxxx"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Send EOD Report To</label><input type="email" id="set-ejs-to" placeholder="you@school.edu"></div>
+        <div class="field"><label>Student Email Domain</label><input type="text" id="set-ejs-domain" placeholder="school.edu"></div>
+      </div>
+      <div class="info-box mb-2" style="font-size:.8rem">Student emails are built automatically: <code>studentid@domain</code> — e.g. <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b3828180878685f3decadfd6ddd2c3d69dddd6c7">[email&#160;protected]</a></code>. Students receive a confirmation on checkout and a receipt on return.</div>
+      <button class="btn btn-primary" onclick="saveEmailSettings()">Save Email Settings</button>
+    </div>
+
+    <div class="set-section">
+      <h3>Data Backup &amp; Restore</h3>
+      <p class="text-dim mb-2" style="font-size:.85rem;">Export a full JSON backup regularly. Store it somewhere safe. If you change devices or browsers, import the backup to restore all data.</p>
+      <div class="set-row">
+        <button class="btn btn-ghost" onclick="exportData()">⬇ Export JSON Backup</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()">⬆ Import JSON Backup</button>
+        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+        <button class="btn btn-ghost" onclick="loadDemo()">🧪 Load Demo Data</button>
+        <button class="btn btn-danger" onclick="nukeClear()">⚠ Clear All Data</button>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <h3>About</h3>
+      <div class="info-box">
+        Open School Inventory System — Single HTML file, no server required. All data stored in browser <code>localStorage</code>. <strong>Export backups regularly</strong> — clearing browser data or switching browsers loses data without a backup.<br><br>
+        Students browse to your server IP on their phones, open this page, and use the Check Out tab. Camera QR scanning requires HTTPS or <code>localhost</code>. For plain <code>http://</code> on your local network, manual item search still works.
+      </div>
+    </div>
+  </div>
+</div>
+
+</main><!-- /main -->
+
+<!-- ═══ MODAL: ADD/EDIT ITEM ═══ -->
+<div id="modal-item" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-item-title">Add Item</div>
+      <button class="modal-close" onclick="closeModal('modal-item')">✕</button>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Item Name *</label><input type="text" id="i-name" placeholder="e.g. DDR4 8GB RAM Stick"></div>
+      <div class="field"><label>Category *</label>
+        <select id="i-cat">
+          <option>RAM</option><option>GPU</option><option>CPU</option>
+          <option>Cable</option><option>Motherboard</option><option>Storage</option>
+          <option>PSU</option><option>Cooling</option><option>Network</option>
+          <option>Hardware</option><option>Tools</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Total Quantity *</label><input type="number" id="i-qty" value="1" min="0"></div>
+      <div class="field"><label>Low Stock Threshold</label><input type="number" id="i-thresh" value="2" min="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Location / Bin</label><input type="text" id="i-loc" placeholder="e.g. Cabinet A, Shelf 2"></div>
+      <div class="field"><label>Condition</label>
+        <select id="i-cond"><option>Good</option><option>Fair</option><option>For Parts</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Notes / Specs</label><textarea id="i-notes" placeholder="Specs, restrictions, origin…"></textarea></div>
+    <input type="hidden" id="i-edit-id">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-item')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ITEM DETAIL ═══ -->
+<div id="modal-detail" class="modal-backdrop">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title" id="det-title">Item</div>
+      <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+    </div>
+    <div id="det-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="det-del-btn" style="margin-right:auto">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-detail')">Close</button>
+      <button class="btn btn-primary" id="det-edit-btn">Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: RETURN ITEM ═══ -->
+<div id="modal-return" class="modal-backdrop">
+  <div class="modal modal-sm" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title text-green">↩ Return Item</div>
+      <button class="modal-close" onclick="closeModal('modal-return')">✕</button>
+    </div>
+    <div id="ret-modal-info" class="confirm-card mb-2" style="margin-bottom:1rem"></div>
+    <div class="field">
+      <label>Return Notes (optional)</label>
+      <input type="text" id="ret-modal-notes" placeholder="Condition, comments…">
+    </div>
+    <label style="display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--red-dim);border:1px solid rgba(239,68,68,.3);border-radius:8px;cursor:pointer;margin-bottom:.25rem">
+      <input type="checkbox" id="ret-modal-damaged" style="width:18px;height:18px;accent-color:var(--red);flex-shrink:0">
+      <div>
+        <div style="font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:.5px;color:var(--red)">⚠ Item Returned Damaged</div>
+        <div style="font-size:.78rem;color:var(--text-dim);margin-top:.15rem">Flags the record, notifies student, and adds to EOD report</div>
+      </div>
+    </label>
+    <div id="ret-modal-damage-note-wrap" class="hidden mt-1">
+      <div class="field">
+        <label>Damage Description *</label>
+        <input type="text" id="ret-modal-damage-desc" placeholder="e.g. Bent connector, cracked housing…">
+      </div>
+    </div>
+    <input type="hidden" id="ret-modal-coid">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-return')">Cancel</button>
+      <button class="btn btn-success" onclick="confirmReturn()">✓ Confirm Return</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-pin" class="modal-backdrop">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">🔐 Admin PIN</div>
+      <button class="modal-close" onclick="closeModal('modal-pin')">✕</button>
+    </div>
+    <p class="text-dim" style="font-size:.88rem;text-align:center">Enter your admin PIN to access protected features.</p>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+      <button class="pin-key zero" onclick="pinKey('0')">0</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ═══════════════════ JS ═══════════════════ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ─── Storage + Server Sync ─── */
+const API = 'api.php';
+let _serverAvailable = false;
+let _pushTimer = null;
+let _pollTimer = null;
+let _lastServerTs = null;
+
+// localStorage cache (instant reads, always available)
+const DB = {
+  get(k)   { try { return JSON.parse(localStorage.getItem('osi_'+k)); } catch { return null; } },
+  set(k,v) { localStorage.setItem('osi_'+k, JSON.stringify(v)); },
+  del(k)   { localStorage.removeItem('osi_'+k); }
+};
+
+// Assemble full data object for server
+function allData() {
+  return { inv:getInv(), co:getCo(), sett:getSett(), ts: Date.now() };
+}
+
+// Pull from server → update localStorage → re-render current view
+async function pullFromServer(quiet=false) {
+  try {
+    const res = await fetch(API + '?t=' + Date.now(), { cache:'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    // Only update if server data is newer (avoid overwriting mid-edit)
+    if (d.ts && _lastServerTs && d.ts <= _lastServerTs) return; // no change
+    if (d.inv)  DB.set('inv',  d.inv);
+    if (d.co)   DB.set('co',   d.co);
+    if (d.sett) DB.set('sett', d.sett);
+    if (d.ts)   _lastServerTs = d.ts;
+    _serverAvailable = true;
+    setSyncStatus('ok', 'synced ' + fmtAgo(Date.now()));
+    document.getElementById('offline-banner').classList.remove('show');
+    if (!quiet) refreshCurrentView();
+  } catch(e) {
+    _serverAvailable = false;
+    setSyncStatus('error', 'offline');
+    document.getElementById('offline-banner').classList.add('show');
+  }
+}
+
+// Push localStorage → server (debounced 800ms after last write)
+function schedulePush() {
+  clearTimeout(_pushTimer);
+  _pushTimer = setTimeout(pushToServer, 800);
+}
+
+async function pushToServer() {
+  if (!_serverAvailable && _lastServerTs === null) {
+    // First load, try anyway
+  }
+  setSyncStatus('syncing', 'saving…');
+  const data = allData();
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const r = await res.json();
+    _lastServerTs = data.ts;
+    _serverAvailable = true;
+    setSyncStatus('ok', 'saved');
+    document.getElementById('offline-banner').classList.remove('show');
+    setTimeout(() => setSyncStatus('ok', 'synced just now'), 1200);
+  } catch(e) {
+    _serverAvailable = false;
+    setSyncStatus('error', 'save failed');
+    document.getElementById('offline-banner').classList.add('show');
+    toast('⚠ Server unreachable — data cached locally','warning');
+  }
+}
+
+function setSyncStatus(state, label) {
+  const pill = document.getElementById('sync-pill');
+  const dot  = document.getElementById('sync-dot');
+  const lbl  = document.getElementById('sync-label');
+  if (!pill) return;
+  pill.className = 'sync-pill ' + state;
+  dot.className  = 'sync-dot' + (state === 'syncing' ? ' spin' : '');
+  lbl.textContent = label;
+}
+
+function fmtAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 5)  return 'just now';
+  if (s < 60) return s + 's ago';
+  return Math.floor(s/60) + 'm ago';
+}
+
+// Start 30-second poll (picks up changes from other machines)
+function startPoll() {
+  clearInterval(_pollTimer);
+  _pollTimer = setInterval(() => pullFromServer(false), 30000);
+}
+
+function refreshCurrentView() {
+  const cur = document.querySelector('.view.active')?.id?.replace('view-','');
+  if (cur) {
+    if (cur==='dashboard') renderDashboard();
+    if (cur==='inventory')  renderInventory();
+    if (cur==='history')    renderHistory();
+    if (cur==='returns')    renderReturns();
+  }
+}
+const getInv  = () => DB.get('inv')  || [];
+const getCo   = () => DB.get('co')   || [];
+const getSett = () => DB.get('sett') || { school:'School Lab', instructor:'', pin:'1234', ejsKey:'', ejsSvc:'', ejsTpl:'', ejsTo:'', ejsDomain:'school.edu' };
+const saveInv  = d => { DB.set('inv', d);  schedulePush(); };
+const saveCo   = d => { DB.set('co',  d);  schedulePush(); };
+const saveSett = d => { DB.set('sett', d); schedulePush(); };
+const CATS = ['RAM','GPU','CPU','Cable','Motherboard','Storage','PSU','Cooling','Network','Hardware','Tools','Other'];
+
+function genId()  { return 'OSI-' + Date.now().toString(36).toUpperCase().slice(-6); }
+function genCoid(){ return 'CO-'  + Date.now().toString(36).toUpperCase().slice(-8); }
+function availQty(item) {
+  const out = getCo().filter(c=>c.itemId===item.id&&!c.returnDate).reduce((s,c)=>s+(c.qty||1),0);
+  return Math.max(0, item.qty - out);
+}
+function getStatus(item) {
+  const a = availQty(item);
+  if (a===0) return 'out';
+  if (a<=item.thresh) return 'low';
+  return 'available';
+}
+function catBadge(cat)    { return `<span class="badge badge-${cat||'Other'}">${cat||'Other'}</span>`; }
+function statusBadge(s)   { const m={available:'Available',low:'Low Stock',out:'Out of Stock'}; return `<span class="badge badge-${s}">${m[s]||s}</span>`; }
+
+/* ─── Admin / PIN ─── */
+let adminUnlocked = false;
+
+function handleLockBtn() {
+  if (adminUnlocked) { lockAdmin(); }
+  else { openPinModal(); }
+}
+
+function openPinModal() {
+  pinBuf = '';
+  document.getElementById('pin-error').textContent = '';
+  updatePinDots();
+  openModal('modal-pin');
+  // Resize pin dots based on saved PIN length
+  const len = Math.max(4, getSett().pin.length);
+  const dc = document.getElementById('pin-dots');
+  dc.innerHTML = Array.from({length:len},(_,i)=>`<div class="pin-dot" id="pd${i}"></div>`).join('');
+}
+
+function lockAdmin() {
+  adminUnlocked = false;
+  updateAdminUI();
+  toast('Admin locked.','info');
+}
+
+function unlockAdmin() {
+  adminUnlocked = true;
+  updateAdminUI();
+  closeModal('modal-pin');
+  toast('Admin unlocked.','success');
+}
+
+function updateAdminUI() {
+  const adminTabs = ['returns','history','eod','labels','settings'];
+  const lockBtn = document.getElementById('lock-btn');
+  const divider = document.getElementById('admin-divider');
+  if (adminUnlocked) {
+    adminTabs.forEach(t => { document.getElementById('tab-'+t)?.classList.remove('hidden'); });
+    divider.style.display = '';
+    lockBtn.textContent = '🔓 Lock Admin';
+    lockBtn.classList.add('unlocked');
+    document.getElementById('dash-admin-actions')?.classList.remove('hidden');
+    document.getElementById('inv-admin-btn')?.classList.remove('hidden');
+  } else {
+    adminTabs.forEach(t => { document.getElementById('tab-'+t)?.classList.add('hidden'); });
+    divider.style.display = 'none';
+    lockBtn.textContent = '🔒 Admin';
+    lockBtn.classList.remove('unlocked');
+    document.getElementById('dash-admin-actions')?.classList.add('hidden');
+    document.getElementById('inv-admin-btn')?.classList.add('hidden');
+    // Redirect to dashboard if on admin tab
+    const cur = document.querySelector('.view.active')?.id?.replace('view-','');
+    if (['returns','history','eod','labels','settings'].includes(cur)) showView('dashboard');
+  }
+}
+
+/* PIN pad */
+let pinBuf = '';
+function pinKey(d) {
+  const maxLen = getSett().pin.length || 4;
+  if (pinBuf.length >= maxLen) return;
+  pinBuf += d;
+  updatePinDots();
+  if (pinBuf.length === maxLen) setTimeout(checkPin, 150);
+}
+function pinDel() { pinBuf = pinBuf.slice(0,-1); updatePinDots(); document.getElementById('pin-error').textContent=''; }
+function updatePinDots() {
+  const sett = getSett();
+  const len = Math.max(4, sett.pin.length);
+  for (let i=0;i<len;i++) {
+    const d = document.getElementById('pd'+i);
+    if (d) d.classList.toggle('filled', i<pinBuf.length);
+  }
+}
+function checkPin() {
+  const sett = getSett();
+  if (pinBuf === (sett.pin||'1234')) { unlockAdmin(); pinBuf=''; }
+  else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    pinBuf = '';
+    updatePinDots();
+    // shake
+    const dots = document.getElementById('pin-dots');
+    dots.style.transform='translateX(-6px)';
+    setTimeout(()=>{ dots.style.transform='translateX(6px)'; setTimeout(()=>{ dots.style.transform=''; },80); },80);
+  }
+}
+
+/* ─── NAV ─── */
+function showView(name) {
+  // Guard admin views
+  if (['returns','history','eod','labels','settings'].includes(name) && !adminUnlocked) {
+    openPinModal(); return;
+  }
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const v = document.getElementById('view-'+name);
+  if (v) v.classList.add('active');
+  document.querySelector(`[data-view="${name}"]`)?.classList.add('active');
+  if (name==='dashboard') renderDashboard();
+  if (name==='inventory')  renderInventory();
+  if (name==='history')    renderHistory();
+  if (name==='returns')    renderReturns();
+  if (name==='labels')     renderLabels();
+  if (name==='settings')   renderSettingsForm();
+  if (name==='eod')        refreshEodPreview();
+}
+
+/* ─── TOAST ─── */
+let toastT;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className='show '+type;
+  clearTimeout(toastT); toastT = setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+/* ─── MODALS ─── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ─── DASHBOARD ─── */
+function renderDashboard() {
+  const inv = getInv(); const co = getCo(); const s = getSett();
+  document.getElementById('dash-lab-name').textContent = s.school || 'School Lab';
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const totalSKU = inv.length;
+  const totalQty = inv.reduce((a,i)=>a+i.qty,0);
+  const activeOut = co.filter(c=>!c.returnDate).length;
+  const lowOut = inv.filter(i=>getStatus(i)!=='available').length;
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card blue"><div class="stat-label">Total SKUs</div><div class="stat-value">${totalSKU}</div></div>
+    <div class="stat-card green"><div class="stat-label">Total Qty</div><div class="stat-value">${totalQty}</div></div>
+    <div class="stat-card amber"><div class="stat-label">Active Checkouts</div><div class="stat-value">${activeOut}</div></div>
+    <div class="stat-card red"><div class="stat-label">Low / Out</div><div class="stat-value">${lowOut}</div></div>`;
+
+  // Low stock
+  const low = inv.filter(i=>getStatus(i)!=='available');
+  document.getElementById('dash-lowstock').innerHTML = low.length
+    ? low.map(i=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border)">
+        ${catBadge(i.cat)}<span style="flex:1;font-size:.85rem">${i.name}</span>
+        ${statusBadge(getStatus(i))}<span class="mono">${availQty(i)}/${i.qty}</span></div>`).join('')
+    : '<p class="text-dim" style="font-size:.85rem">All items stocked. ✓</p>';
+
+  // Recent activity
+  const recent = [...co].sort((a,b)=>new Date(b.checkoutDate)-new Date(a.checkoutDate)).slice(0,7);
+  document.getElementById('dash-activity').innerHTML = recent.length
+    ? recent.map(c=>{
+        const item=inv.find(i=>i.id===c.itemId);
+        const isRet=!!c.returnDate;
+        const d=new Date(isRet?c.returnDate:c.checkoutDate);
+        return `<div class="activity-item"><div class="dot ${isRet?'in':'out'}"></div><div>
+          <div class="act-text"><strong>${c.sid}</strong> ${isRet?'returned':'took'} <strong>${item?.name||c.itemId}</strong> ×${c.qty||1}</div>
+          <div class="act-time">${d.toLocaleString()}</div></div></div>`;
+      }).join('')
+    : '<p class="text-dim" style="font-size:.85rem">No activity yet.</p>';
+
+  // Active checkouts
+  const active = co.filter(c=>!c.returnDate);
+  document.getElementById('dash-active-count').textContent = active.length ? `${active.length} active` : '';
+  document.getElementById('dash-active-co').innerHTML = active.length
+    ? `<div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Item</th><th>Qty</th><th>Date Out</th><th>Days</th>${adminUnlocked?'<th></th>':''}</tr></thead>
+        <tbody>${active.map(c=>{
+          const item=inv.find(i=>i.id===c.itemId);
+          const days=Math.floor((Date.now()-new Date(c.checkoutDate))/(864e5));
+          return `<tr>
+            <td class="mono">${c.sid}</td>
+            <td>${item?.name||c.itemId} ${catBadge(item?.cat)}</td>
+            <td class="mono">${c.qty||1}</td>
+            <td style="font-size:.78rem;color:var(--text-dim)">${new Date(c.checkoutDate).toLocaleDateString()}</td>
+            <td><span class="badge ${days>3?'badge-out':'badge-available'}">${days}d</span></td>
+            ${adminUnlocked?`<td><button class="btn btn-success btn-sm" onclick="openReturnModal('${c.id}')">Return</button></td>`:''}
+          </tr>`;
+        }).join('')}</tbody></table></div>`
+    : '<p class="text-dim" style="font-size:.85rem">No active checkouts.</p>';
+}
+
+/* ─── INVENTORY ─── */
+function renderInventory() {
+  const inv=getInv();
+  const q=(document.getElementById('inv-search')?.value||'').toLowerCase();
+  const cf=document.getElementById('inv-cat-filter')?.value||'';
+  const sf=document.getElementById('inv-status-filter')?.value||'';
+
+  // Populate category filter once
+  const catSel=document.getElementById('inv-cat-filter');
+  if(catSel&&catSel.options.length<=1) CATS.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
+
+  const filtered=inv.filter(i=>{
+    const mq=!q||i.name.toLowerCase().includes(q)||i.id.toLowerCase().includes(q)||(i.loc||'').toLowerCase().includes(q);
+    const mc=!cf||i.cat===cf;
+    const ms=!sf||getStatus(i)===sf;
+    return mq&&mc&&ms;
+  });
+
+  document.getElementById('inv-count').textContent=`${filtered.length}/${inv.length}`;
+
+  const grid=document.getElementById('inv-grid');
+  if(!filtered.length){grid.innerHTML='<div class="no-items" style="grid-column:1/-1">No items found</div>';return;}
+  grid.innerHTML=filtered.map(item=>{
+    const a=availQty(item);
+    const qc=a===0?'zero':a<=item.thresh?'low':'ok';
+    return `<div class="inv-card" onclick="openDetail('${item.id}')">
+      <div class="inv-card-top"><div class="inv-card-name">${item.name}</div>${catBadge(item.cat)}</div>
+      <div class="inv-card-id">${item.id}</div>
+      ${item.loc?`<div class="inv-card-loc">📍 ${item.loc}</div>`:''}
+      <div class="inv-card-foot">
+        <div><span class="qty-big ${qc}">${a}</span> <span class="qty-of">/ ${item.qty}</span></div>
+        ${statusBadge(getStatus(item))}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── ADD / EDIT ITEM ─── */
+function openAddItem() {
+  if(!adminUnlocked){openPinModal();return;}
+  document.getElementById('modal-item-title').textContent='Add Item';
+  ['i-name','i-loc','i-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('i-cat').value='Other';
+  document.getElementById('i-qty').value=1;
+  document.getElementById('i-thresh').value=2;
+  document.getElementById('i-cond').value='Good';
+  document.getElementById('i-edit-id').value='';
+  openModal('modal-item');
+  setTimeout(()=>document.getElementById('i-name').focus(),100);
+}
+
+function openEditItem(id) {
+  const item=getInv().find(i=>i.id===id); if(!item)return;
+  document.getElementById('modal-item-title').textContent='Edit Item';
+  document.getElementById('i-name').value=item.name;
+  document.getElementById('i-cat').value=item.cat;
+  document.getElementById('i-qty').value=item.qty;
+  document.getElementById('i-thresh').value=item.thresh||2;
+  document.getElementById('i-loc').value=item.loc||'';
+  document.getElementById('i-cond').value=item.cond||'Good';
+  document.getElementById('i-notes').value=item.notes||'';
+  document.getElementById('i-edit-id').value=item.id;
+  openModal('modal-item');
+}
+
+function saveItem() {
+  const name=document.getElementById('i-name').value.trim();
+  if(!name){toast('Name required','error');return;}
+  const editId=document.getElementById('i-edit-id').value;
+  const inv=getInv();
+  const data={ name, cat:document.getElementById('i-cat').value, qty:parseInt(document.getElementById('i-qty').value)||0, thresh:parseInt(document.getElementById('i-thresh').value)||2, loc:document.getElementById('i-loc').value.trim(), cond:document.getElementById('i-cond').value, notes:document.getElementById('i-notes').value.trim() };
+  if(editId){ const i=inv.findIndex(x=>x.id===editId); if(i>=0) inv[i]={...inv[i],...data}; }
+  else inv.push({id:genId(), addedDate:new Date().toISOString(), ...data});
+  saveInv(inv);
+  closeModal('modal-item'); closeModal('modal-detail');
+  renderInventory(); renderDashboard();
+  toast(editId?'Item updated!':'Item added!','success');
+}
+
+function deleteItem(id) {
+  if(!confirm('Delete this item and all its checkout history?'))return;
+  saveInv(getInv().filter(i=>i.id!==id));
+  saveCo(getCo().filter(c=>c.itemId!==id));
+  closeModal('modal-detail'); renderInventory(); renderDashboard();
+  toast('Item deleted.','info');
+}
+
+/* ─── ITEM DETAIL MODAL ─── */
+function openDetail(id) {
+  const item=getInv().find(i=>i.id===id); if(!item)return;
+  const co=getCo().filter(c=>c.itemId===id);
+  const active=co.filter(c=>!c.returnDate);
+  document.getElementById('det-title').textContent=item.name;
+
+  document.getElementById('det-body').innerHTML=`
+    <div style="display:flex;gap:1.25rem;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:1;min-width:200px">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">${catBadge(item.cat)} ${statusBadge(getStatus(item))} <span class="badge badge-Hardware">${item.cond||'Good'}</span></div>
+        <div class="field mb-1"><label>Item ID</label><div class="mono" style="padding:.4rem .7rem;background:var(--bg3);border-radius:4px">${item.id}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem">
+          <div><div class="text-dim" style="font-size:.72rem;font-family:var(--display);letter-spacing:1px;text-transform:uppercase;margin-bottom:.2rem">Total</div><div style="font-family:var(--mono);font-size:1.6rem;color:var(--blue)">${item.qty}</div></div>
+          <div><div class="text-dim" style="font-size:.72rem;font-family:var(--display);letter-spacing:1px;text-transform:uppercase;margin-bottom:.2rem">Available</div><div style="font-family:var(--mono);font-size:1.6rem;color:${availQty(item)===0?'var(--red)':availQty(item)<=item.thresh?'var(--amber)':'var(--green)'}">${availQty(item)}</div></div>
+        </div>
+        ${item.loc?`<div class="text-dim" style="font-size:.85rem;margin-bottom:.5rem">📍 ${item.loc}</div>`:''}
+        ${item.notes?`<div class="text-dim" style="font-size:.82rem">${item.notes}</div>`:''}
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:var(--display);font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem">QR Code</div>
+        <div id="det-qr" style="display:flex;justify-content:center"></div>
+        <div class="mono" style="font-size:.65rem;color:var(--text-muted);margin-top:.3rem">${item.id}</div>
+      </div>
+    </div>
+    ${active.length?`<div class="alert alert-amber mt-2">⚠ ${active.length} unit(s) currently out</div>`:''}
+    ${co.length?`<div class="mt-2"><div class="card-title" style="font-size:.8rem">History (${co.length})</div>
+      <div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:6px">
+        <table><thead><tr><th>Student</th><th>Date Out</th><th>Qty</th><th>Status</th></tr></thead>
+        <tbody>${co.slice().reverse().map(c=>`<tr>
+          <td class="mono">${c.sid}</td>
+          <td style="font-size:.78rem">${new Date(c.checkoutDate).toLocaleDateString()}</td>
+          <td class="mono">${c.qty||1}</td>
+          <td>${c.returnDate?`<span class="text-green" style="font-size:.78rem">${new Date(c.returnDate).toLocaleDateString()}</span>`:'<span class="text-amber" style="font-size:.78rem">Out</span>'}</td>
+        </tr>`).join('')}</tbody></table></div></div>`:''}`;
+
+  // Admin edit/delete buttons
+  const isAdmin = adminUnlocked;
+  document.getElementById('det-edit-btn').classList.toggle('hidden', !isAdmin);
+  document.getElementById('det-del-btn').classList.toggle('hidden', !isAdmin);
+  document.getElementById('det-edit-btn').onclick = ()=>{ closeModal('modal-detail'); openEditItem(id); };
+  document.getElementById('det-del-btn').onclick  = ()=>deleteItem(id);
+
+  openModal('modal-detail');
+  setTimeout(()=>{
+    try { new QRCode(document.getElementById('det-qr'),{text:item.id,width:120,height:120,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M}); }
+    catch(e){ document.getElementById('det-qr').textContent=item.id; }
+  },60);
+}
+
+/* ─── CHECKOUT ─── */
+let coSid=null, coItem=null, coScanner=null;
+
+function coReset() {
+  coSid=null; coItem=null; stopCoScanner();
+  document.getElementById('co-sid').value='';
+  document.getElementById('co-item-q').value='';
+  document.getElementById('co-item-results').innerHTML='';
+  document.getElementById('co-scan-msg').innerHTML='';
+  document.getElementById('co-scanner-wrap').classList.add('hidden');
+  setCoStep(1);
+}
+function setCoStep(n) {
+  [1,2,3].forEach(i=>{
+    const s=document.getElementById('step-'+i);
+    s.classList.remove('active','done');
+    if(i<n)s.classList.add('done');
+    if(i===n)s.classList.add('active');
+    document.getElementById('co-s'+i)?.classList.toggle('hidden',i!==n);
+  });
+}
+function onSidInput() {
+  const v=document.getElementById('co-sid').value.replace(/\D/g,'');
+  document.getElementById('co-sid').value=v;
+  const h=document.getElementById('co-sid-hint');
+  h.textContent=v.length?`${v.length} digit${v.length!==1?'s':''}${v.length>=6?' — ready':''}`:' ';
+  h.className=v.length>=6?'text-green mt-1':'text-dim mt-1';
+}
+function coNext1() {
+  const id=document.getElementById('co-sid').value.trim();
+  if(!id){toast('Enter your student ID','error');return;}
+  coSid=id;
+  document.getElementById('co-sid-display').textContent=id;
+  setCoStep(2);
+  setTimeout(()=>document.getElementById('co-item-q').focus(),100);
+}
+function coBack2() { setCoStep(2); }
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.activeElement?.id==='co-sid') coNext1();
+});
+
+function renderCoResults() {
+  const q=document.getElementById('co-item-q').value.toLowerCase();
+  const div=document.getElementById('co-item-results');
+  if(!q){div.innerHTML='';return;}
+  const matches=getInv().filter(i=>i.name.toLowerCase().includes(q)||i.id.toLowerCase().includes(q));
+  div.innerHTML=matches.length
+    ?matches.map(i=>{const a=availQty(i);return`<div class="item-result-row" onclick="selectCoItem('${i.id}')">
+        ${catBadge(i.cat)}<span style="flex:1;font-size:.9rem">${i.name}</span>
+        <span class="mono ${a===0?'text-red':a<=i.thresh?'text-amber':'text-green'}">${a} avail</span></div>`;}).join('')
+    :'<div style="padding:.9rem 1rem;color:var(--text-muted);font-size:.85rem">No items found</div>';
+}
+
+function selectCoItem(id) {
+  const item=getInv().find(i=>i.id===id); if(!item)return;
+  if(availQty(item)===0){toast('Out of stock!','error');return;}
+  coItem=item; showCoStep3();
+}
+
+function showCoStep3() {
+  document.getElementById('co-confirm-sid').textContent=coSid;
+  const a=availQty(coItem);
+  document.getElementById('co-confirm-card').innerHTML=`
+    <div style="flex:1">${catBadge(coItem.cat)}
+      <div style="font-family:var(--display);font-size:1.15rem;font-weight:700;margin-top:.3rem">${coItem.name}</div>
+      <div class="mono" style="font-size:.7rem;color:var(--text-muted)">${coItem.id}</div>
+    </div>
+    <div style="text-align:right"><div style="font-family:var(--mono);font-size:1.8rem;color:var(--green)">${a}</div><div style="font-size:.75rem;color:var(--text-dim)">available</div></div>`;
+  document.getElementById('co-qty').max=a;
+  document.getElementById('co-qty').value=1;
+  document.getElementById('co-notes').value='';
+  setCoStep(3); stopCoScanner();
+}
+
+function confirmCo() {
+  const qty=parseInt(document.getElementById('co-qty').value)||1;
+  const notes=document.getElementById('co-notes').value.trim();
+  if(qty>availQty(coItem)){toast(`Only ${availQty(coItem)} available!`,'error');return;}
+  const co=getCo();
+  const rec={id:genCoid(),itemId:coItem.id,sid:coSid,qty,notes,checkoutDate:new Date().toISOString(),returnDate:null,returnNotes:'',damaged:false};
+  co.push(rec);
+  saveCo(co);
+  toast(`✓ ${coItem.name} ×${qty} checked out to ${coSid}`,'success');
+  sendStudentEmail(coSid,'checkout',{item:coItem,qty,notes});
+  coReset();
+}
+
+/* ─── Student email helper ─── */
+async function sendStudentEmail(sid, type, data) {
+  const s=getSett();
+  if(!s.ejsKey||!s.ejsSvc||!s.ejsTpl) return; // silently skip if not configured
+  const domain=s.ejsDomain||'school.edu';
+  const toEmail=`${sid}@${domain}`;
+  const school=s.school||'School Lab';
+  const now=new Date().toLocaleString();
+  let subject, message;
+  if(type==='checkout'){
+    subject=`Open School Inventory — Checkout Confirmation`;
+    message=`Hello ${sid},\n\nThis confirms you checked out the following item from ${school}:\n\n  Item:  ${data.item.name}\n  ID:    ${data.item.id}\n  Qty:   ${data.qty}\n  When:  ${now}${data.notes?'\n  Note:  '+data.notes:''}\n\nPlease return this item promptly when finished.\n\n— ${school}`;
+  } else if(type==='return'){
+    const dmg=data.damaged?'\n\n⚠ DAMAGE REPORTED: '+data.returnNotes:'';
+    subject=`Open School Inventory — Return Receipt${data.damaged?' ⚠ Damage Noted':''}`;
+    message=`Hello ${sid},\n\nThis confirms the following item has been returned to ${school}:\n\n  Item:     ${data.item.name}\n  ID:       ${data.item.id}\n  Qty:      ${data.qty}\n  Returned: ${now}${data.returnNotes?'\n  Notes:    '+data.returnNotes:''}${dmg}\n\n${data.damaged?'Please see your instructor regarding the reported damage.\n\n':''}— ${school}`;
+  }
+  try {
+    emailjs.init(s.ejsKey);
+    await emailjs.send(s.ejsSvc, s.ejsTpl, { to_email:toEmail, subject, message });
+  } catch(e) { console.warn('Student email failed:',e); }
+}
+
+/* QR Scanner */
+function toggleCoScanner() {
+  const wrap=document.getElementById('co-scanner-wrap');
+  if(wrap.classList.contains('hidden')){wrap.classList.remove('hidden');startCoScanner();}
+  else{wrap.classList.add('hidden');stopCoScanner();}
+}
+function startCoScanner() {
+  if(coScanner)return;
+  try {
+    coScanner=new Html5Qrcode('qr-co');
+    coScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},
+      decoded=>{
+        stopCoScanner();
+        document.getElementById('co-scanner-wrap').classList.add('hidden');
+        const item=getInv().find(i=>i.id===decoded.trim());
+        if(item){coItem=item;const a=availQty(item);if(a===0){toast('Out of stock!','error');return;}showCoStep3();}
+        else{document.getElementById('co-scan-msg').innerHTML=`<div class="alert alert-amber">Unknown item ID: ${decoded}</div>`;}
+      },()=>{});
+  } catch(e){
+    document.getElementById('co-scan-msg').innerHTML=`<div class="alert alert-amber">Camera unavailable: ${e.message||e}.<br>Use manual search above or ensure HTTPS/localhost.</div>`;
+    coScanner=null;
+  }
+}
+function stopCoScanner() {
+  if(coScanner){try{coScanner.stop().catch(()=>{});}catch(e){} coScanner=null;}
+}
+
+/* ─── RETURNS ─── */
+function renderReturns() {
+  const q=(document.getElementById('ret-q')?.value||'').toLowerCase().trim();
+  const co=getCo(); const inv=getInv();
+  const active=co.filter(c=>!c.returnDate);
+  const matches=q?active.filter(c=>{const item=inv.find(i=>i.id===c.itemId);return c.sid.toLowerCase().includes(q)||(item?.name||'').toLowerCase().includes(q)||c.itemId.toLowerCase().includes(q);}):active.slice(0,30);
+  const div=document.getElementById('ret-results');
+  if(!matches.length){div.innerHTML='<div class="no-items">No active checkouts found</div>';return;}
+  div.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Student</th><th>Item</th><th>Qty</th><th>Date Out</th><th>Days</th><th>Notes</th><th></th></tr></thead>
+    <tbody>${matches.map(c=>{
+      const item=inv.find(i=>i.id===c.itemId);
+      const days=Math.floor((Date.now()-new Date(c.checkoutDate))/864e5);
+      return`<tr>
+        <td class="mono">${c.sid}</td>
+        <td>${item?.name||c.itemId} ${catBadge(item?.cat)}</td>
+        <td class="mono">${c.qty||1}</td>
+        <td style="font-size:.78rem;color:var(--text-dim)">${new Date(c.checkoutDate).toLocaleDateString()}</td>
+        <td><span class="badge ${days>3?'badge-out':'badge-available'}">${days}d</span></td>
+        <td style="font-size:.78rem;color:var(--text-dim)">${c.notes||'—'}</td>
+        <td><button class="btn btn-success btn-sm" onclick="openReturnModal('${c.id}')">✓ Return</button></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+function openReturnModal(coId) {
+  const co=getCo(); const rec=co.find(c=>c.id===coId); if(!rec)return;
+  const item=getInv().find(i=>i.id===rec.itemId);
+  document.getElementById('ret-modal-coid').value=coId;
+  document.getElementById('ret-modal-notes').value='';
+  document.getElementById('ret-modal-damaged').checked=false;
+  document.getElementById('ret-modal-damage-desc').value='';
+  document.getElementById('ret-modal-damage-note-wrap').classList.add('hidden');
+  document.getElementById('ret-modal-info').innerHTML=`
+    <div style="flex:1">${catBadge(item?.cat||'Other')}
+      <div style="font-family:var(--display);font-size:1.1rem;font-weight:700;margin-top:.3rem">${item?.name||rec.itemId}</div>
+      <div class="mono" style="font-size:.7rem;color:var(--text-muted)">Student: ${rec.sid} · Qty: ${rec.qty||1}</div>
+    </div>`;
+  openModal('modal-return');
+  // Wire damage checkbox toggle
+  document.getElementById('ret-modal-damaged').onchange=function(){
+    document.getElementById('ret-modal-damage-note-wrap').classList.toggle('hidden',!this.checked);
+    if(this.checked) setTimeout(()=>document.getElementById('ret-modal-damage-desc').focus(),80);
+  };
+}
+
+function confirmReturn() {
+  const coId=document.getElementById('ret-modal-coid').value;
+  const notes=document.getElementById('ret-modal-notes').value.trim();
+  const damaged=document.getElementById('ret-modal-damaged').checked;
+  const damageDesc=document.getElementById('ret-modal-damage-desc').value.trim();
+  if(damaged&&!damageDesc){toast('Please describe the damage','error');return;}
+  const co=getCo(); const i=co.findIndex(c=>c.id===coId); if(i<0)return;
+  const item=getInv().find(x=>x.id===co[i].itemId);
+  const returnNotes=damaged?`DAMAGE: ${damageDesc}${notes?' | '+notes:''}`:notes;
+  co[i].returnDate=new Date().toISOString();
+  co[i].returnNotes=returnNotes;
+  co[i].damaged=damaged;
+  saveCo(co);
+  closeModal('modal-return');
+  toast(damaged?`⚠ Returned with damage — ${item?.name||'item'}`:`✓ ${item?.name||'Item'} returned by ${co[i].sid}`, damaged?'warning':'success');
+  sendStudentEmail(co[i].sid,'return',{item,qty:co[i].qty||1,returnNotes,damaged});
+  renderReturns(); renderDashboard();
+}
+
+/* ─── HISTORY ─── */
+function renderHistory() {
+  const co=getCo(); const inv=getInv();
+  const q=(document.getElementById('hist-q')?.value||'').toLowerCase();
+  const f=document.getElementById('hist-filter')?.value||'';
+  const filtered=co.filter(c=>{
+    const item=inv.find(i=>i.id===c.itemId);
+    const mq=!q||c.sid.toLowerCase().includes(q)||(item?.name||'').toLowerCase().includes(q)||c.itemId.toLowerCase().includes(q);
+    const mf=!f||(f==='out'&&!c.returnDate)||(f==='returned'&&!!c.returnDate);
+    return mq&&mf;
+  }).sort((a,b)=>new Date(b.checkoutDate)-new Date(a.checkoutDate));
+
+  document.getElementById('hist-tbody').innerHTML=filtered.length
+    ?filtered.map(c=>{const item=inv.find(i=>i.id===c.itemId);return`<tr>
+        <td style="font-size:.78rem;color:var(--text-dim)">${new Date(c.checkoutDate).toLocaleString()}</td>
+        <td class="mono">${c.sid}</td>
+        <td>${item?.name||c.itemId} ${catBadge(item?.cat)}</td>
+        <td class="mono">${c.qty||1}</td>
+        <td style="font-size:.78rem;color:var(--text-dim)">${c.notes||'—'}</td>
+        <td><span class="badge ${c.returnDate?'badge-returned':'badge-active'}">${c.returnDate?'Returned':'Active'}</span>${c.damaged?` <span class="badge" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.3)">⚠ Damaged</span>`:''}</td>
+        <td style="font-size:.78rem">${c.returnDate?`<span class="text-green">${new Date(c.returnDate).toLocaleDateString()}</span>${c.returnNotes?`<div style="color:var(--text-dim);font-size:.72rem;margin-top:.15rem">${c.returnNotes}</div>`:''}`:' <span class="text-amber">Out</span>'}</td>
+      </tr>`;}).join('')
+    :`<tr><td colspan="7" class="no-items">No records found</td></tr>`;
+}
+
+function exportCSV() {
+  const co=getCo(); const inv=getInv();
+  const rows=[['Checkout ID','Student ID','Item ID','Item Name','Category','Qty','Date Out','Date Returned','Checkout Notes','Return Notes','Damaged']];
+  co.forEach(c=>{const item=inv.find(i=>i.id===c.itemId)||{};rows.push([c.id,c.sid,c.itemId,item.name||'',item.cat||'',c.qty||1,c.checkoutDate,c.returnDate||'',c.notes||'',c.returnNotes||'',c.damaged?'YES':'']);});
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  dl('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'osi-history.csv');
+}
+
+/* ─── EOD EMAIL ─── */
+function buildEodMessage() {
+  const co=getCo(); const inv=getInv(); const s=getSett();
+  const active=co.filter(c=>!c.returnDate);
+  const today=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(!active.length) return { subject:`Open School Inventory — All Items Returned — ${today}`, body:`All items have been returned as of ${today}.\n\nNo outstanding checkouts.` };
+
+  // Group by student
+  const byStudent={};
+  active.forEach(c=>{
+    if(!byStudent[c.sid])byStudent[c.sid]=[];
+    const item=inv.find(i=>i.id===c.itemId);
+    const days=Math.floor((Date.now()-new Date(c.checkoutDate))/864e5);
+    byStudent[c.sid].push(`  • ${item?.name||c.itemId} ×${c.qty||1} (${days}d out${c.notes?', note: '+c.notes:''})`);
+  });
+
+  let body=`OPEN SCHOOL INVENTORY — END OF DAY REPORT\n${today}\n${'─'.repeat(50)}\n\n`;
+  body+=`OUTSTANDING CHECKOUTS: ${active.length} item(s) not returned\n\n`;
+  Object.entries(byStudent).forEach(([sid,items])=>{
+    body+=`Student ID: ${sid}\n${items.join('\n')}\n\n`;
+  });
+
+  // Damage reports from today
+  const todayStr=new Date().toLocaleDateString();
+  const damaged=getCo().filter(c=>c.damaged&&c.returnDate&&new Date(c.returnDate).toLocaleDateString()===todayStr);
+  if(damaged.length){
+    body+='─'.repeat(50)+'\n⚠ DAMAGE REPORTS TODAY\n\n';
+    damaged.forEach(c=>{
+      const item=inv.find(i=>i.id===c.itemId);
+      body+=`  Student: ${c.sid} | Item: ${item?.name||c.itemId}\n  ${c.returnNotes||'(no description)'}\n\n`;
+    });
+  }
+
+  body+='─'.repeat(50)+`\n${s.school||'School Lab'} — Generated by Open School Inventory System`;
+  const dmgNote=damaged.length?` + ${damaged.length} damage report(s)`:'';
+  return { subject:`⚠ Open School Inventory — ${active.length} Item(s) Not Returned${dmgNote} — ${today}`, body };
+}
+
+function refreshEodPreview() {
+  const {subject,body}=buildEodMessage();
+  document.getElementById('eod-preview').textContent=`TO: ${getSett().ejsTo||'(not configured)'}\nSUBJECT: ${subject}\n\n${body}`;
+}
+
+async function sendEodEmail() {
+  const s=getSett();
+  if(!s.ejsKey||!s.ejsSvc||!s.ejsTpl||!s.ejsTo){
+    document.getElementById('eod-status').innerHTML='<div class="alert alert-amber">EmailJS not configured. Go to Settings → Email Setup first.</div>';
+    return;
+  }
+  const {subject,body}=buildEodMessage();
+  const btn=document.getElementById('eod-send-btn');
+  btn.textContent='Sending…'; btn.disabled=true;
+  try {
+    emailjs.init(s.ejsKey);
+    await emailjs.send(s.ejsSvc, s.ejsTpl, { to_email:s.ejsTo, subject, message:body });
+    document.getElementById('eod-status').innerHTML=`<div class="alert alert-green">✓ Email sent to ${s.ejsTo}</div>`;
+    toast('EOD email sent!','success');
+  } catch(e) {
+    document.getElementById('eod-status').innerHTML=`<div class="alert alert-red">Send failed: ${e?.text||e?.message||JSON.stringify(e)}</div>`;
+    toast('Email failed — check Settings','error');
+  }
+  btn.textContent='📧 Send EOD Email Now'; btn.disabled=false;
+}
+
+/* ─── LABELS ─── */
+let labelSel=new Set();
+
+function renderLabels() {
+  const inv=getInv();
+  const q=(document.getElementById('label-q')?.value||'').toLowerCase();
+  const filtered=q?inv.filter(i=>i.name.toLowerCase().includes(q)||i.id.toLowerCase().includes(q)):inv;
+
+  document.getElementById('label-chips').innerHTML=filtered.map(i=>`
+    <label class="chip ${labelSel.has(i.id)?'on':''}" onclick="toggleLabel('${i.id}');event.preventDefault()">
+      <input type="checkbox" style="display:none"> ${i.name}
+    </label>`).join('');
+
+  const sel=filtered.filter(i=>labelSel.has(i.id));
+  document.getElementById('labels-grid').innerHTML=sel.length
+    ?sel.map(i=>`<div class="label-card">
+        <div class="qr-cent"><div id="qlb-${i.id}"></div></div>
+        <div class="l-name">${i.name}</div>
+        <div class="l-id">${i.id}</div>
+        ${i.loc?`<div class="l-loc">${i.loc}</div>`:''}
+      </div>`).join('')
+    :'<p class="text-dim no-print" style="font-size:.85rem">Select items above to preview labels.</p>';
+
+  sel.forEach(i=>setTimeout(()=>{
+    try{new QRCode(document.getElementById('qlb-'+i.id),{text:i.id,width:80,height:80,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+  },60));
+}
+function toggleLabel(id){labelSel.has(id)?labelSel.delete(id):labelSel.add(id);renderLabels();}
+function labelSelectAll(){getInv().forEach(i=>labelSel.add(i.id));renderLabels();}
+function labelClearAll(){labelSel.clear();renderLabels();}
+
+/* ─── SETTINGS ─── */
+function renderSettingsForm() {
+  const s=getSett();
+  document.getElementById('set-school').value=s.school||'';
+  document.getElementById('set-instructor').value=s.instructor||'';
+  document.getElementById('set-ejs-key').value=s.ejsKey||'';
+  document.getElementById('set-ejs-svc').value=s.ejsSvc||'';
+  document.getElementById('set-ejs-tpl').value=s.ejsTpl||'';
+  document.getElementById('set-ejs-to').value=s.ejsTo||'';
+  document.getElementById('set-ejs-domain').value=s.ejsDomain||'school.edu';
+}
+function saveSettings() {
+  const s=getSett();
+  s.school=document.getElementById('set-school').value.trim()||'School Lab';
+  s.instructor=document.getElementById('set-instructor').value.trim();
+  saveSett(s); toast('Saved!','success');
+}
+function savePin() {
+  const p1=document.getElementById('set-pin').value;
+  const p2=document.getElementById('set-pin2').value;
+  if(!p1||p1.length<4){toast('PIN must be 4+ digits','error');return;}
+  if(p1!==p2){toast('PINs do not match','error');return;}
+  if(!/^\d+$/.test(p1)){toast('PIN must be digits only','error');return;}
+  const s=getSett(); s.pin=p1; saveSett(s);
+  document.getElementById('set-pin').value='';
+  document.getElementById('set-pin2').value='';
+  toast('PIN changed!','success');
+}
+function saveEmailSettings() {
+  const s=getSett();
+  s.ejsKey=document.getElementById('set-ejs-key').value.trim();
+  s.ejsSvc=document.getElementById('set-ejs-svc').value.trim();
+  s.ejsTpl=document.getElementById('set-ejs-tpl').value.trim();
+  s.ejsTo =document.getElementById('set-ejs-to').value.trim();
+  s.ejsDomain=document.getElementById('set-ejs-domain').value.trim().replace(/^@/,'') || 'school.edu';
+  saveSett(s); toast('Email settings saved!','success');
+}
+
+/* ─── DATA ─── */
+function exportData() {
+  const data={inv:getInv(),co:getCo(),sett:getSett(),exported:new Date().toISOString()};
+  dl('data:application/json,'+encodeURIComponent(JSON.stringify(data,null,2)),'osi-backup-'+Date.now()+'.json');
+  toast('Backup exported!','success');
+}
+function importData(e) {
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try {
+      const d=JSON.parse(ev.target.result);
+      if(d.inv)saveInv(d.inv);
+      if(d.co)saveCo(d.co);
+      if(d.sett)saveSett(d.sett);
+      toast('Backup restored!','success');
+      showView('dashboard');
+    } catch { toast('Invalid backup file','error'); }
+  };
+  r.readAsText(f);
+}
+function nukeClear() {
+  if(!confirm('⚠ Delete ALL inventory and checkout data permanently?'))return;
+  ['inv','co'].forEach(k=>DB.del(k));
+  toast('Data cleared.','info'); renderDashboard();
+}
+function loadDemo() {
+  if(!confirm('Load demo inventory? This replaces current items.'))return;
+  const demo=[
+    {id:'OSI-DEMO01',name:'DDR4 8GB RAM',cat:'RAM',qty:14,thresh:3,loc:'Cabinet A — Shelf 1',cond:'Good',notes:'Kingston/Corsair mixed',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO02',name:'DDR4 4GB RAM',cat:'RAM',qty:8,thresh:2,loc:'Cabinet A — Shelf 1',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO03',name:'GTX 1050 Ti',cat:'GPU',qty:3,thresh:1,loc:'Cabinet B — Shelf 2',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO04',name:'Intel Core i5-8400',cat:'CPU',qty:5,thresh:2,loc:'Cabinet B — Shelf 1',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO05',name:'Cat6 Ethernet 3ft',cat:'Cable',qty:30,thresh:5,loc:'Drawer 3',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO06',name:'Cat6 Ethernet 6ft',cat:'Cable',qty:20,thresh:5,loc:'Drawer 3',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO07',name:'SATA SSD 240GB',cat:'Storage',qty:8,thresh:2,loc:'Cabinet A — Shelf 3',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO08',name:'ATX PSU 500W',cat:'PSU',qty:4,thresh:1,loc:'Cabinet C',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO09',name:'M3 Standoff Screws',cat:'Hardware',qty:200,thresh:30,loc:'Parts Tray',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO10',name:'TP-Link 8-Port Switch',cat:'Network',qty:6,thresh:2,loc:'Shelf D',cond:'Good',notes:'TL-SG108',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO11',name:'CPU Thermal Paste',cat:'Cooling',qty:10,thresh:3,loc:'Drawer 1',cond:'Good',notes:'Arctic MX-4',addedDate:new Date().toISOString()},
+    {id:'OSI-DEMO12',name:'Phillips Screwdriver',cat:'Tools',qty:8,thresh:2,loc:'Tool rack',cond:'Good',notes:'',addedDate:new Date().toISOString()},
+  ];
+  saveInv(demo); toast('Demo data loaded!','success'); showView('inventory');
+}
+
+function dl(url,name){const a=document.createElement('a');a.href=url;a.download=name;a.click();}
+
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', async () => {
+  updateAdminUI();
+  setSyncStatus('syncing', 'connecting…');
+  await pullFromServer(true);   // load fresh data before first render
+  renderDashboard();
+  document.querySelectorAll('.modal-backdrop').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)closeModal(b.id);}));
+  document.addEventLis
