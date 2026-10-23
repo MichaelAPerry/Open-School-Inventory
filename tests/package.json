@@ -1,0 +1,11 @@
+{
+  "name": "open-school-inventory-tests",
+  "private": true,
+  "description": "End-to-end tests for Open School Inventory (not needed to run the app)",
+  "scripts": {
+    "test": "node e2e.test.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.2"
+  }
+}
