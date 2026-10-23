@@ -1,0 +1,8 @@
+# Live data and backups — never commit student records
+osi-data/
+cit-data.json
+cit-data.json.*
+cit-backups/
+# Test tooling
+tests/node_modules/
+tests/package-lock.json

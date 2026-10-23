@@ -1,0 +1,5 @@
+id,name,cat,qty,thresh,loc,cond,kind,serial,notes
+,EXAMPLE - Fluke 117 Multimeter #1,Test Equipment,1,0,CAB-A / S1,Good,Returnable,LTSD-004211,Delete these example rows before importing
+,EXAMPLE - Wire Stripper 10-22 AWG,Hand Tools,12,3,WALL-1,Good,Returnable,,Klein 11055
+,EXAMPLE - Cat6 Patch Cable 3ft,Cables,40,10,DRAWER-3,Good,Returnable,,
+,EXAMPLE - Zip Ties 8in,Consumables,500,100,DRAWER-7,Good,Consumable,,Reorder at 100
