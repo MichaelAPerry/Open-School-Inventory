@@ -3,6 +3,26 @@
 About 10–15 minutes. You need a Windows PC that stays on during school hours (the "server") and
 can be reached by the other computers and phones in the shop.
 
+## Single checkout computer (no student phones)
+
+If one computer does everything, install XAMPP **on that computer** and use
+`http://localhost/inventory/open-school-inventory.html`. Strictly, the HTML file alone works without a server,
+but XAMPP is still worth the 10 minutes:
+
+| | HTML file alone | XAMPP on the same PC |
+|---|---|---|
+| Where data lives | Inside the browser. **Lost** if browser data is cleared, the Windows profile is reset, or someone uses a different browser | A file in `osi-data\` |
+| Automatic backups | None. You must export by hand | Daily, last 30 days |
+| Check returns from your own desk PC later | No | Yes, just add the device |
+
+Use the plain HTML file only if you can't install software on that computer. In that case, export a JSON backup every Friday.
+
+**Kiosk setup:**
+- Plug in a **2D USB scanner**. It reads the QR labels and the barcode on student ID cards.
+- On the Labels tab, set **QR Code Contains → Item ID only**. Link labels are only useful for phones.
+- Make the inventory page the browser's start page. Optionally run the browser full screen (F11).
+- Always click **Lock Admin** before walking away. It also locks itself after 10 minutes idle.
+
 ## 1. Install XAMPP
 
 1. Download XAMPP for Windows from apachefriends.org (any version with PHP 7.4 or newer).

@@ -32,7 +32,9 @@ Why not RFID: tags, readers and iPhone limits cost more than they save in one sh
 | If the server address changes | Unaffected | Phone-camera links break (scanners still work); reprint or have IT keep the old name |
 | QR density | Smaller, easier to scan | Denser; keep labels ≥ 0.75" |
 
-**Recommendation:** get a DNS name from IT (e.g. `cit-inventory`), rename the page to `index.html`, and print **Link** labels.
+**No student phones (one checkout computer)?** Print **ID only** and use a 2D USB scanner at that computer. That's the simplest, most reliable setup.
+
+**If students will use phones:** get a DNS name from IT (e.g. `cit-inventory`), rename the page to `index.html`, and print **Link** labels.
 That works with every device and needs no HTTPS. If you can't get a stable address, print **ID only** and use a USB scanner at the kiosk.
 
 ## 2. What gets a label — three tiers
