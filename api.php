@@ -27,6 +27,9 @@ $DATA_DIR    = __DIR__ . '/osi-data';
 $MAX_BACKUPS = 30;            // keep last 30 daily backups
 $MAX_BODY    = 8 * 1024 * 1024; // reject uploads over 8 MB
 $DEFAULT_PIN = '1234';
+// true = only the computer running this server can use the app (one checkout computer).
+// Requests from any other device on the network are refused.
+$LOCAL_ONLY  = false;
 
 $DATA_FILE  = $DATA_DIR . '/osi-data.json';
 $BACKUP_DIR = $DATA_DIR . '/backups';
@@ -36,6 +39,10 @@ function respond($code, $payload) {
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
+}
+
+if ($LOCAL_ONLY && !in_array(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '', ['127.0.0.1', '::1'], true)) {
+    respond(403, ['error' => 'This inventory only accepts requests from the server computer itself']);
 }
 
 // ── First-run setup: protected data folder + migration from old versions ────

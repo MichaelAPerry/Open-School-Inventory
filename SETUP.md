@@ -17,6 +17,19 @@ but XAMPP is still worth the 10 minutes:
 
 Use the plain HTML file only if you can't install software on that computer. In that case, export a JSON backup every Friday.
 
+**Lock it to this one computer.** If a single computer does everything, nothing else on the network should be able
+to reach the inventory. That matters most when students know how to probe a network (CTF classes):
+1. In `api.php`, set `$LOCAL_ONLY = true;`. The API then refuses every request that doesn't come from this computer.
+2. In XAMPP, **Config → Apache (httpd.conf)**: change `Listen 80` to `Listen 127.0.0.1:80`. In
+   **Config → Apache (httpd-ssl.conf)**: change `Listen 443` to `Listen 127.0.0.1:443`. Restart Apache.
+   Apache now only answers this computer.
+3. When Windows Firewall asks about Apache, click **Cancel**. Nothing needs to reach it from outside.
+
+Check it: from another device, `http://CHECKOUT-PC-IP/inventory/api.php` must fail to load.
+To add a second device later, undo these three steps.
+
+**Don't host it on a CTF or lab server.** That machine is built to be attacked, and the inventory holds student records.
+
 **Kiosk setup:**
 - Plug in a **2D USB scanner**. It reads the QR labels and the barcode on student ID cards.
 - On the Labels tab, set **QR Code Contains → Item ID only**. Link labels are only useful for phones.
