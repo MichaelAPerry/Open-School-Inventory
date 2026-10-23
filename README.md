@@ -64,7 +64,9 @@ Students receive checkout confirmations and return receipts at `{studentid}@{you
 
 ## Project docs
 
+- [DEPLOY.md](DEPLOY.md): flash-drive checklist for one checkout computer with a Dymo LabelWriter 450
 - [SETUP.md](SETUP.md): install, upgrade, security check, HTTPS options, troubleshooting
+- [docs/student-instructions.pdf](docs/student-instructions.pdf): printable how-to-check-out sign for students
 - [docs/SHOP-INVENTORY-PLAN.md](docs/SHOP-INVENTORY-PLAN.md): labeling and inventory process
 - [docs/CODE-REVIEW.md](docs/CODE-REVIEW.md): code review findings, what was fixed, roadmap
 - `tests/`: end-to-end tests (`cd tests && npm install && npx playwright install chromium && npm test`, needs PHP)

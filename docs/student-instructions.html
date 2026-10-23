@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How to Check Out Equipment</title>
+<!-- Printable sign for the checkout computer. Open in a browser and print on Letter paper (Margins: Default). -->
+<style>
+  @page { size: letter; margin: .5in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Arial, Helvetica, sans-serif; color: #111; background: #fff; max-width: 7.5in; margin: 0 auto; }
+  h1 { font-size: 27pt; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; line-height: 1.05; }
+  .sub { font-size: 12pt; color: #444; margin: .04in 0 .16in; }
+  .step { display: flex; gap: .18in; align-items: center; border: 2.5px solid #111; border-radius: 10px; padding: .1in .18in; margin-bottom: .1in; }
+  .num { flex: 0 0 .56in; height: .56in; border-radius: 50%; border: 4px solid #111; color: #111; font-size: 24pt; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .step h2 { font-size: 17pt; font-weight: 800; text-transform: uppercase; margin-bottom: .04in; }
+  .step p { font-size: 12pt; line-height: 1.3; }
+  .or { color: #555; font-size: 11pt; margin-top: .04in; }
+  .done { border: 1.5px dashed #111; border-radius: 10px; padding: .08in .18in; font-size: 12pt; margin-bottom: .14in; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: .1in; margin-bottom: .1in; }
+  .box { border: 1.5px solid #111; border-radius: 8px; padding: .08in .14in; }
+  .box h3 { font-size: 13pt; font-weight: 800; text-transform: uppercase; margin-bottom: .05in; }
+  .box p, .box li { font-size: 10.5pt; line-height: 1.3; }
+  .box ul { padding-left: .18in; }
+  .warn { border-width: 2.5px; }
+  .foot { display: flex; justify-content: space-between; font-size: 10.5pt; color: #333; border-top: 1px solid #999; padding-top: .08in; }
+  .line { display: inline-block; min-width: 1.8in; border-bottom: 1px solid #333; }
+  kbd { font-family: inherit; font-weight: 700; border: 1.5px solid #333; border-radius: 4px; padding: 0 .05in; font-size: .92em; }
+  b.ui { font-weight: 800; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <h1>How to Check Out Equipment</h1>
+  <p class="sub">Everything that leaves the shelf gets scanned out. It takes about 10 seconds.</p>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div>
+      <h2>Scan your student ID</h2>
+      <p>Hold the barcode on your ID card under the scanner until it beeps.</p>
+      <p class="or">No card? Type your ID number and press <kbd>Enter</kbd>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div>
+      <h2>Scan the item's label</h2>
+      <p>Scan the QR code on the item, or on its bin or drawer.</p>
+      <p class="or">No label or it won't scan? Type the item's name and click it in the list.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div>
+      <h2>Enter how many &amp; confirm</h2>
+      <p>Type how many you're taking (or leave it at 1), then press <kbd>Enter</kbd> or click <b class="ui">✓ Confirm Checkout</b>.</p>
+      <p class="or">Add a note (project, class period) if your teacher asks for one.</p>
+    </div>
+  </div>
+
+  <div class="done"><b>✓ Look for the green message</b> with the item and <i>your ID number</i> in the bottom corner of the screen. No message means it didn't save, so ask your teacher.</div>
+
+  <div class="grid">
+    <div class="box warn">
+      <h3>↩ Returning items</h3>
+      <p>Give items back <b>to your teacher</b> (or the Returns bin). Don't put them straight back on the shelf. It stays checked out to <b>you</b> until your teacher checks it in.</p>
+    </div>
+    <div class="box">
+      <h3>Supplies (screws, zip ties…)</h3>
+      <p>Same 3 steps. Supplies that get used up don't need to be returned. Scan them so we know when to reorder.</p>
+    </div>
+    <div class="box warn">
+      <h3>⚠ Broken or damaged?</h3>
+      <p>Tell your teacher when you return it. Reporting damage is fine; hiding it is not.</p>
+    </div>
+    <div class="box">
+      <h3>Screen says…</h3>
+      <ul>
+        <li><b>Out of stock</b>: all of them are checked out. Ask your teacher.</li>
+        <li><b>No item matches</b>: type the name instead, and tell your teacher the label needs replacing.</li>
+        <li><b>Not on Check Out</b>: click <b class="ui">Check Out</b> at the top.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box" style="margin-bottom:.12in">
+    <h3>Rules</h3>
+    <ul>
+      <li>Only scan <b>your own</b> ID. Whatever is checked out to your ID is your responsibility.</li>
+      <li>Don't touch the <b class="ui">🔒 Admin</b> button.</li>
+      <li>Screen already shows someone else's ID? Click <b class="ui">Change</b> and scan yours.</li>
+      <li>Changed your mind halfway through? Just walk away; it clears itself after 2 minutes.</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <span>Teacher: <span class="line"></span></span>
+    <span>Room: <span class="line" style="min-width:1in"></span></span>
+  </div>
+</body>
+</html>

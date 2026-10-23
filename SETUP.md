@@ -1,5 +1,8 @@
 # Setup — XAMPP on Windows
 
+> **Installing on one checkout computer from a flash drive?** Follow the checklist in [DEPLOY.md](DEPLOY.md) instead.
+> This page is the full reference.
+
 About 10–15 minutes. You need a Windows PC that stays on during school hours (the "server") and
 can be reached by the other computers and phones in the shop.
 
@@ -33,7 +36,10 @@ To add a second device later, undo these three steps.
 **Kiosk setup:**
 - Plug in a **2D USB scanner**. It reads the QR labels and the barcode on student ID cards.
 - On the Labels tab, set **QR Code Contains → Item ID only**. Link labels are only useful for phones.
-- Make the inventory page the browser's start page. Optionally run the browser full screen (F11).
+- Make `http://localhost/inventory/open-school-inventory.html#checkout` the browser's start page. The `#checkout`
+  ending opens straight to Check Out, keeps the cursor in the student ID box for the scanner, and goes back to
+  Check Out (clearing any half-finished checkout) after 2 minutes idle. Optionally run the browser full screen (F11).
+- Dymo LabelWriter print settings are in [DEPLOY.md](DEPLOY.md), section F.
 - Always click **Lock Admin** before walking away. It also locks itself after 10 minutes idle.
 
 ## 1. Install XAMPP

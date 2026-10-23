@@ -269,6 +269,40 @@ async function checkout(page, sid, query, qty = 1, notes = '') {
   await pb.evaluate(() => pullFromServer()); await sleep(300);
   ok(await pb.evaluate(() => getInv().length) === 13, 'restore propagates to other kiosk');
 
+  console.log('Kiosk mode (#checkout) + Dymo label button');
+  const K = await browser.newContext(); const pk = await K.newPage(); const kerr = [];
+  pk.on('pageerror', e => kerr.push(e.message));
+  await pk.goto(BASE + '#checkout');
+  await pk.waitForSelector('#view-checkout.active');
+  await pk.waitForFunction(() => document.activeElement?.id === 'co-sid');
+  ok(true, 'kiosk opens on Check Out with the cursor in the student ID box');
+  await pk.keyboard.type('246810'); await pk.keyboard.press('Enter');          // scanner: student ID card
+  await pk.waitForFunction(() => document.activeElement?.id === 'co-item-q');
+  await pk.keyboard.type('OSI-DEMO05'); await pk.keyboard.press('Enter');      // scanner: item label
+  ok(await pk.isVisible('#co-s3'), 'two scans with no clicking reach the confirm step');
+  await pk.keyboard.press('Enter');                                             // Enter in quantity confirms
+  await pk.waitForFunction(() => document.activeElement?.id === 'co-sid');
+  ok((await pk.textContent('#toast')).includes('checked out to 246810'), 'Enter confirms, and the cursor goes back to the ID box for the next student');
+  await pk.keyboard.type('135791'); await pk.keyboard.press('Enter');
+  await pk.evaluate(() => { _lastActivity = Date.now() - 3 * 60 * 1000; });
+  await pk.waitForFunction(() => !document.getElementById('co-s1').classList.contains('hidden'), null, { timeout: 40000 });
+  ok(await pk.evaluate(() => coSid === null), 'a half-finished checkout is cleared after 2 minutes idle');
+  await pk.click('[data-view="inventory"]');
+  await pk.evaluate(() => { _lastActivity = Date.now() - 3 * 60 * 1000; });
+  await pk.waitForSelector('#view-checkout.active', { timeout: 40000 });
+  ok(true, 'kiosk returns to Check Out when idle');
+  ok(kerr.length === 0, 'no kiosk JS errors ' + kerr.join(' | '));
+  await K.close();
+
+  await pa.click('[data-view="dashboard"]');
+  await pa.evaluate(() => openAddItem());
+  await pa.fill('#i-name', 'Label Test Crimper'); await pa.click('text=Save Item');
+  await pa.waitForSelector('#modal-detail.open');
+  ok((await pa.textContent('#det-title')) === 'Label Test Crimper', 'a newly added item opens right away');
+  await pa.click('#det-label-btn');
+  await pa.waitForSelector('#view-labels.active');
+  ok(await pa.$$eval('#labels-grid .label-card', e => e.length) === 1 && (await pa.textContent('#labels-grid')).includes('Label Test Crimper'), 'Print Label shows just that item\'s label');
+
   console.log('Errors');
   ok(pa.errors.length === 0, 'kiosk A no JS errors ' + pa.errors.join(' | '));
   ok(pb.errors.length === 0, 'kiosk B no JS errors ' + pb.errors.join(' | '));

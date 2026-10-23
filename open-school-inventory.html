@@ -803,6 +803,7 @@ tr:hover td { background: rgba(59,130,246,0.03); }
     <div class="modal-footer">
       <button class="btn btn-danger btn-sm" id="det-del-btn" style="margin-right:auto">Delete</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-detail')">Close</button>
+      <button class="btn btn-ghost" id="det-label-btn">🏷 Print Label</button>
       <button class="btn btn-primary" id="det-edit-btn">Edit</button>
     </div>
   </div>
@@ -879,6 +880,9 @@ const BADGE_STYLES = DEFAULT_CATS; // categories with a dedicated .badge-* colou
 const CONDS = ['Good','Fair','For Parts'];
 const ADMIN_VIEWS = ['returns','history','eod','labels','settings'];
 const AUTO_LOCK_MS = 10 * 60 * 1000; // re-lock admin after 10 minutes without interaction
+const KIOSK_IDLE_MS = 2 * 60 * 1000; // kiosk: clear a half-finished checkout after 2 minutes
+// Open the page as …/open-school-inventory.html#checkout on a checkout computer
+const HOME_VIEW = location.hash === '#checkout' ? 'checkout' : 'dashboard';
 
 // Strictly increasing timestamp so two edits in the same millisecond still order correctly
 let _lastStamp = 0;
@@ -1154,7 +1158,7 @@ function updateAdminUI() {
   document.getElementById('inv-admin-btn')?.classList.toggle('hidden', !adminUnlocked);
   if (!adminUnlocked) {
     const cur = document.querySelector('.view.active')?.id?.replace('view-','');
-    if (ADMIN_VIEWS.includes(cur)) showView('dashboard');
+    if (ADMIN_VIEWS.includes(cur)) showView(HOME_VIEW);
     else refreshCurrentView();
   }
 }
@@ -1211,6 +1215,7 @@ function showView(name) {
   if (name === 'labels')    renderLabels();
   if (name === 'settings')  renderSettingsForm();
   if (name === 'eod')       refreshEodPreview();
+  if (name === 'checkout')  focusCheckout();
 }
 
 /* ─── TOAST ─── */
@@ -1381,6 +1386,7 @@ function saveItem() {
   saveInv(inv);
   closeModal('modal-item'); closeModal('modal-detail');
   refreshCurrentView();
+  if (!editId) openDetail(inv[inv.length - 1].id);
   const stillOut = editId ? outQty({ id:editId }) : 0;
   if (qtyIn < stillOut) toast(`Saved. Note: ${stillOut} unit(s) are still checked out`, 'warning');
   else toast(editId ? 'Item updated!' : 'Item added!', 'success');
@@ -1435,6 +1441,8 @@ function openDetail(id) {
         </tr>`).join('')}</tbody></table></div></div>` : ''}`;
 
   document.getElementById('det-edit-btn').classList.toggle('hidden', !adminUnlocked);
+  document.getElementById('det-label-btn').classList.toggle('hidden', !adminUnlocked);
+  document.getElementById('det-label-btn').onclick = () => { closeModal('modal-detail'); labelSel = new Set([id]); showView('labels'); };
   document.getElementById('det-del-btn').classList.toggle('hidden', !adminUnlocked);
   document.getElementById('det-edit-btn').onclick = () => { closeModal('modal-detail'); openEditItem(id); };
   document.getElementById('det-del-btn').onclick  = () => deleteItem(id);
@@ -1452,6 +1460,13 @@ function makeQR(el, text, level) {
 /* ─── CHECKOUT ─── */
 let coSid = null, coItem = null, coScanner = null, pendingItemId = null;
 
+// Keep the cursor where a USB scanner's input should land
+function focusCheckout() {
+  if (!document.getElementById('view-checkout').classList.contains('active')) return;
+  const el = document.getElementById(coSid ? 'co-item-q' : 'co-sid');
+  if (!document.getElementById(coSid ? 'co-s2' : 'co-s1').classList.contains('hidden')) el.focus();
+}
+
 function coReset() {
   coSid = null; coItem = null; pendingItemId = null; stopCoScanner();
   document.getElementById('co-sid').value = '';
@@ -1461,6 +1476,7 @@ function coReset() {
   document.getElementById('co-scan-msg').innerHTML = '';
   document.getElementById('co-scanner-wrap').classList.add('hidden');
   setCoStep(1);
+  focusCheckout();
 }
 function setCoStep(n) {
   [1,2,3].forEach(i => {
@@ -1486,7 +1502,7 @@ function coNext1() {
   document.getElementById('co-sid-display').textContent = id;
   setCoStep(2);
   if (pendingItemId) { const p = pendingItemId; pendingItemId = null; selectCoItem(p); return; }
-  setTimeout(() => document.getElementById('co-item-q').focus(), 100);
+  document.getElementById('co-item-q').focus();
 }
 function coBack2() { setCoStep(2); }
 
@@ -1535,6 +1551,7 @@ function showCoStep3() {
   document.getElementById('co-notes').value = '';
   setCoStep(3); stopCoScanner();
   document.getElementById('co-scanner-wrap').classList.add('hidden');
+  const q = document.getElementById('co-qty'); q.focus(); q.select();
 }
 
 function confirmCo() {
@@ -2128,7 +2145,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   document.addEventListener('pointerdown', () => { _lastActivity = Date.now(); });
-  setInterval(() => { if (adminUnlocked && Date.now() - _lastActivity > AUTO_LOCK_MS) lockAdmin('Admin locked after 10 minutes of inactivity.'); }, 30000);
+  setInterval(() => {
+    const idle = Date.now() - _lastActivity;
+    if (adminUnlocked && idle > AUTO_LOCK_MS) lockAdmin('Admin locked after 10 minutes of inactivity.');
+    if (adminUnlocked || idle < KIOSK_IDLE_MS || document.querySelector('.modal-backdrop.open')) return;
+    if (coSid) coReset(); // a student walked away mid-checkout
+    if (HOME_VIEW === 'checkout' && !document.getElementById('view-checkout').classList.contains('active')) showView('checkout');
+  }, 30000);
 
   window.addEventListener('beforeprint', setPageStyle);
   window.addEventListener('hashchange', () => handleItemLink(true));
@@ -2142,7 +2165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   setSyncStatus('syncing', 'connecting…');
-  renderDashboard();          // show cached data immediately
+  if (HOME_VIEW === 'checkout') showView('checkout'); else renderDashboard(); // show cached data immediately
   handleItemLink(false);
   await pullFromServer();     // then merge in the latest from the server
   refreshCurrentView();
