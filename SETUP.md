@@ -6,12 +6,26 @@ can be reached by the other computers and phones in the shop.
 ## 1. Install XAMPP
 
 1. Download XAMPP for Windows from apachefriends.org (any version with PHP 7.4 or newer).
-2. Install to the default `C:\xampp`. You only need **Apache** and **PHP**. MySQL isn't used.
-3. Open the **XAMPP Control Panel** and click **Start** next to Apache.
+2. Install to the default `C:\xampp`. On the component screen you only need **Apache** and **PHP**;
+   untick MySQL, FileZilla, Mercury, Tomcat, Perl and phpMyAdmin. If Windows warns about User Account
+   Control, click OK; installing to `C:\xampp` avoids the problem it describes.
+3. Open the **XAMPP Control Panel** and click **Start** next to Apache. It should turn green.
+   - **Won't start / "Port 80 in use"?** Another program has port 80, usually IIS ("World Wide Web Publishing
+     Service"), Skype, or VMware. Stop that program, or click **Config → Apache (httpd.conf)**, change
+     `Listen 80` to `Listen 8080`, and add `:8080` after the server name in every address below.
 4. When Windows Firewall asks, allow Apache on **Private networks**.
-5. Optional: click **Config → Service** (or tick the "Svc" box) so Apache starts automatically with Windows.
+5. **Make it start by itself:** close the Control Panel, right-click it → **Run as administrator**, and tick the
+   **Svc** box next to Apache. Apache then runs as a Windows service whenever the PC is on, even with nobody
+   logged in. Without this, someone has to open XAMPP and click Start every morning.
+
+**Does XAMPP have to be running?** Yes, whenever students check things out from more than one device.
+If Apache is stopped, every device shows **offline**. Each device keeps working and saves its changes,
+but devices can't see each other's changes until Apache is back. Setting it up as a service (step 5) solves this.
 
 ## 2. Copy the app
+
+**Get the files:** on GitHub, open the repository, switch to the branch that has this update (or `main` once it's
+merged), then click **Code → Download ZIP** and unzip it.
 
 Create `C:\xampp\htdocs\inventory\` and copy these into it:
 
@@ -31,8 +45,11 @@ Tip: rename `open-school-inventory.html` to `index.html`. The address becomes
 - From other devices: `http://SERVER-IP/inventory/open-school-inventory.html`
   (find the IP with `ipconfig` in a Command Prompt, under "IPv4 Address").
 
-The pill in the top-right should read **synced**. The first save creates the protected `osi-data\`
-folder next to `api.php`.
+The pill in the top-right should read **synced**. The first time the page loads, it creates the protected
+`osi-data\` folder next to `api.php`. On a brand-new install, the inventory is empty: go to **Admin** (PIN `1234`) →
+**Settings** and continue with step 4, then follow `docs/SHOP-INVENTORY-PLAN.md` to load your items.
+
+**Starting from scratch?** Skip step 5 (Upgrading); it's only for moving data from the old version.
 
 **Ask district IT for two things:**
 1. A **fixed IP or DNS name** for the server (e.g. `http://cit-inventory/`), so bookmarks and QR link labels
