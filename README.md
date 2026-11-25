@@ -1,9 +1,13 @@
 # Open School Inventory
 
-A free, open source inventory and checkout system for school labs, makerspaces, and technical shops.
-It runs as one HTML page. Add the small PHP file and every computer and phone in the room shares the same data.
+An inventory and checkout system for school labs, makerspaces, and technical shops. Use it at a
+single checkout station or add the PHP backend to share records across the shop.
 
-Built by a CIT teacher who couldn't find anything that actually fit a classroom workflow.
+**Status: Active.** Start with the browser-only setup for a trial with sample items. For checkout
+records tied to students, follow the server setup and district IT requirements before deploying.
+
+[Choose a setup](#quick-start) · [Windows kiosk checklist](DEPLOY.md) ·
+[Printable student instructions](docs/student-instructions.pdf)
 
 ## Features
 
@@ -11,7 +15,7 @@ Built by a CIT teacher who couldn't find anything that actually fit a classroom 
 - **Scan with anything**: USB barcode scanners, the in-app camera, or a phone's normal camera app (link labels open checkout with the item already selected)
 - **Student checkout**: 3 steps (ID → item → confirm), designed for phones
 - **Returnable vs consumable items**: tools come back, screws and zip ties are logged as used
-- **Multi-device sync**: record-by-record merging, so simultaneous checkouts and offline devices don't lose data
+- **Multi-device sync**: record-by-record merging when devices connect to the shared server
 - **CSV import / export**: build the whole inventory in a spreadsheet, re-import to update counts
 - **End-of-day email**: unreturned items, damage reports, consumables used, low stock
 - **Damage tracking** on returns
